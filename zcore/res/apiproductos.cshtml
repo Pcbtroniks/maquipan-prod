@@ -1,0 +1,105 @@
+@using System
+@using System.IO
+@using System.Web
+@using System.Configuration
+@using System.Threading.Tasks
+@using MySql.Data.MySqlClient
+@using Newtonsoft.Json.Linq
+@using System.Text.RegularExpressions
+
+
+@{
+
+    List<Respuesta> respuesta = new List<Respuesta>();
+    string JsonTest = "";
+
+    string sandbox = "";
+
+    try
+    {
+        //--------------------------------------------------------------- RECIBIMOS LOS CAMPOS DE ACCESO
+        HttpContext httpContext = HttpContext.Current;
+        var requestBody = "";
+        using (var reader = new StreamReader(httpContext.Request.InputStream))
+        {
+            requestBody = reader.ReadToEnd();
+
+            JsonTest = requestBody;
+        }
+
+        // Decodificar la cadena URL
+        string decodedRequestBody = HttpUtility.UrlDecode(requestBody);
+
+        // Parsear el cuerpo decodificado como un objeto JObject
+        JObject data = JObject.Parse(decodedRequestBody);
+        string cate = "";
+
+
+        if (sandbox == "1")
+        {
+            cate = "*";
+        }
+        else
+        {
+            cate = data["cate"].ToString();
+        }
+
+
+
+        //--------------------------------------------------------------- VALIDAMOS EL TOKEN DE ACCESO
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            string query = "SELECT id, urlf, nombre, precio, cate FROM catart WHERE cate = @varCate OR cate2 = @varCate OR cate3 = @varCate OR cate4 = @varCate OR cate5 = @varCate ORDER BY nombre ASC";
+
+            if (cate == "*")
+            {
+                query = "SELECT id, urlf, nombre, precio, cate FROM catart ORDER BY nombre ASC";
+            }
+
+            using (MySqlCommand CMD = new MySqlCommand(query, CONN))
+            {
+                CMD.Parameters.AddWithValue("@varCate", cate);
+
+                MySqlDataReader DATOS = CMD.ExecuteReader();
+                while (DATOS.Read())
+                {
+                    Respuesta newRespuesta = new Respuesta();
+
+                    newRespuesta.id = DATOS["id"].ToString();
+                    newRespuesta.urlf = DATOS["urlf"].ToString();
+                    newRespuesta.nombre = DATOS["nombre"].ToString();
+                    newRespuesta.precio = Convert.ToDecimal(DATOS["precio"].ToString()).ToString("N2");
+                    newRespuesta.cate = DATOS["cate"].ToString();
+
+                    respuesta.Add(newRespuesta);
+                }
+
+            }
+        }
+
+        var JsonResponse = Json.Encode(respuesta);
+        Response.ContentType = "application/json";
+        Response.Write(JsonResponse);
+
+
+    }
+    catch (Exception ex)
+    {
+        Response.Write(ex.Message);
+    }
+}
+
+@functions{
+
+
+    public class Respuesta
+    {
+        public string id { set; get; }
+        public string urlf { set; get; }
+        public string nombre { set; get; }
+        public string precio { set; get; }
+        public string cate { set; get; }
+    }
+
+}

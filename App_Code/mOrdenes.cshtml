@@ -1,0 +1,130 @@
+@using System
+@using System.Configuration
+@using MySqlConnector
+
+@functions{
+
+    public static bool haveOrderOpen()
+    {
+        bool respuesta = false;
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("SELECT id, galleta, estatus FROM ordenes WHERE galleta = @varGalleta AND estatus = 'PEN' ", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                {
+                    respuesta = DATOS.HasRows;
+                }
+            }
+        }
+        return respuesta;
+    }
+
+    public static string idOrderOpen(string id)
+    {
+        string respuesta = "";
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("SELECT id, estatus FROM ordenes WHERE id_cliente = @varId ", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varId", id);
+                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                {
+                    while (DATOS.Read())
+                    {
+                        respuesta = DATOS["id"].ToString();
+                    }
+                }
+            }
+        }
+        return respuesta;
+    }
+
+    public static string idOrderOpenGalleta()
+    {
+        string respuesta = "";
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("SELECT id, estatus FROM ordenes WHERE estatus = 'PEN' AND galleta = @varGalleta ", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                {
+                    while (DATOS.Read())
+                    {
+                        respuesta = DATOS["id"].ToString();
+                    }
+                }
+            }
+        }
+        return respuesta;
+    }
+
+    public static void setOrderAddress(string tipo, string idUbicacion)
+    {
+        switch (tipo)
+        {
+            case "c":
+                using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+                {
+                    CONN.Open();
+                    using (MySqlCommand CMD = new MySqlCommand("INSERT INTO carrito SET (id_art, codigo, precio, cantidad) VALUES ()", CONN))
+                    {
+                        using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                        {
+
+                        }
+                    }
+                }
+                break;
+            case "o":
+                break;
+            default:
+                break;
+        }
+    }
+
+    public static string getCantItemsCart(string tipo, string galleta)
+    {
+        string respuesta = "0";
+
+        try
+        {
+            if (tipo == "o")
+            {
+                using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+                {
+                    CONN.Open();
+                    using (MySqlCommand CMD = new MySqlCommand("SELECT COUNT(*) FROM ordenes WHERE galleta = @varGalleta", CONN))
+                    {
+                        CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+                        return Convert.ToInt32(CMD.ExecuteScalar()).ToString();
+                    }
+                }
+            }
+            else
+            {
+                using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+                {
+                    CONN.Open();
+                    using (MySqlCommand CMD = new MySqlCommand("SELECT COUNT(*) FROM carrito WHERE galleta = @varGalleta", CONN))
+                    {
+                        CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+                        return Convert.ToInt32(CMD.ExecuteScalar()).ToString();
+                    }
+                }
+            }
+        }
+        catch (MySqlException ex)
+        {
+            return "0";
+        }
+
+        return respuesta;
+
+    }
+}

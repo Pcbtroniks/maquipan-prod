@@ -1,0 +1,186 @@
+﻿@mSeguridad.CookieID()
+
+<!DOCTYPE html>
+<html lang="es-mx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow"/>
+    <!-- Title -->
+    <title>Login</title>
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <!-- Fontawesome css -->
+    <link rel="stylesheet" href="assets/css/fontawesome.all.min.css" />
+    <!-- owl.carousel css -->
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css" />
+    <!-- owl.theme.default css -->
+    <link rel="stylesheet" href="assets/css/owl.theme.default.min.css" />
+    <!-- animate css -->
+    <link rel="stylesheet" href="assets/css/animate.min.css" />
+    <!-- meanmenu css -->
+    <link rel="stylesheet" href="assets/css/meanmenu.min.css" />
+    <!-- Style css -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- color css -->
+    <link rel="stylesheet" href="assets/css/color.css" />
+    <!-- Responsive css -->
+    <link rel="stylesheet" href="assets/css/responsive.css" />
+    <link rel="apple-touch-icon" sizes="57x57" href="assets/img/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/img/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/img/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/img/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/img/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/img/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/img/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/img/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="assets/img/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="assets/img/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <style>
+        #cEyeIcon {
+            position: absolute;
+            right: 15px;
+            top: 55px;
+        }
+
+        #eyeIcon {
+            font-size: 20px;
+        }
+
+        hr.style-mp {
+            margin-top: 35px;
+            border: 0; 
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+            width: 100%;
+        }
+
+    </style>
+    @mAnalitica.AnaliticaGoogle()
+</head>
+
+<body>
+    <!-- Preloader Area -->
+    <div id="preloader">
+        <div id="status">
+            <img src="assets/img/loader.gif" alt="img">
+        </div>
+    </div>
+
+    @navegacion.Menu()
+
+    <!-- Banner Area -->
+    <section id="common_banner_one" style="background-image: url(/img/secciones/b_nosotros.jpg)">
+        <div class="container ">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="common_banner_text">
+                        <h2>Ingresar</h2>
+                        <ul>
+                            <li><a href="~/">Inicio</a></li>
+                            <li><i class="fas fa-slash"></i></li>
+                            <li class="active">Ingresar</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checkout-Area -->
+    @{
+        if (mClientes.ObtenerValorCookie("d1") == "1")
+        {
+            Response.Redirect("~/micuenta");
+        }
+        else
+        {
+            <section id="login_area" class="ptb-100">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                                <div class="account_form">
+                                    <h3>Mi cuenta </h3>
+									<form action="~/zcore/clientes/ingresar" method="post">
+										<input name="origen" type="hidden" value="">
+
+										<div class="default-form-box">
+											<label>Correo <span>*</span></label>
+											<input name="correo" type="email" class="form-control">
+										</div>
+										<div class="default-form-box position-relative">
+											<label>Contraseña <span>*</span></label>
+											<input name="contra" id="password" type="password" class="form-control">
+											<span id="cEyeIcon" class="toggle-password"
+												  style="transform: translateY(-50%); cursor: pointer;">
+												<i id="eyeIcon" class="fas fa-eye" onclick="togglePasswordVisibility('password')"></i>
+											</span>
+										</div>
+										<div class="col-md-12 mb-4">
+											<p class="text-danger">@Session["mi_perfil_equivocado"]</p>
+										</div>
+										<div class="col-md-12 mb-4"><small><a href="~/recupera">¿Olvidaste Tu contraseña?</a></small></div>
+										<div class="login_submit">
+											<button class="theme-btn-one btn-black-overlay btn_md" type="submit">ingresar</button>
+										</div>
+									</form>
+                                    <hr class="style-mp">
+                                </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="account_form">
+                                <h3>Crear cuenta</h3>
+                                <p class="pt-4">
+                                    ¡Únete a nuestra comunidad! <br /><br />
+                                    Regístrate y sé el primero en recibir descuentos exclusivos, novedades y las últimas noticias sobre nuestros productos y servicios. ¡No te pierdas ninguna oportunidad y disfruta de beneficios especiales reservados solo para nuestros miembros!
+                                </p>
+                                <div class="text-center pt-5">
+                                    <a href="~/crear_usuario">¿Crear una cuenta?</a>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        }
+    }
+
+    <!-- footer Area -->
+    @navegacion.Footer()
+
+    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+    <script src="~/assets/js/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/js/owl.carousel.min.js"></script>
+    <script src="~/assets/js/meanmenu.min.js"></script>
+    <script src="~/assets/js/count.js"></script>
+    <script src="~/assets/js/timer.js"></script>
+    <script src="~/assets/js/nice-select.min.js"></script>
+    <script src="~/assets/js/wow.min.js"></script>
+    <script src="~/assets/js/custom.js"></script>
+    <script src="~/zcore/js/buscador.js"></script>
+    <script>
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+            } else {
+                input.type = "password";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

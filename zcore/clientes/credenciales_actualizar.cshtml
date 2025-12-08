@@ -1,0 +1,33 @@
+@using System
+@using System.Configuration
+@using MySql.Data.MySqlClient
+
+@{
+    string id = Request.Form["id"];
+    string nombre = mSeguridad.sslCampo(Request.Form["nombre"].ToUpper());
+    string materno = mSeguridad.sslCampo(Request.Form["materno"].ToUpper());
+    string paterno = mSeguridad.sslCampo(Request.Form["paterno"].ToUpper());
+    string correo = mSeguridad.sslCampo(Request.Form["correo"].ToUpper());
+    string contra = mSeguridad.sslCampo(Request.Form["contra"].ToUpper());
+
+
+
+    using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+    {
+        CONN.Open();
+        using (var CMD = new MySql.Data.MySqlClient.MySqlCommand("UPDATE clientes SET  nombre = @varNombre, materno = @varmaterno, paterno = @varpaterno, correo = @varcorreo, contra = @varcontra WHERE id = @id;", CONN))
+        {
+
+            CMD.Parameters.AddWithValue("@id", id);
+            CMD.Parameters.AddWithValue("@varnombre", nombre);
+            CMD.Parameters.AddWithValue("@varmaterno", materno);
+            CMD.Parameters.AddWithValue("@varpaterno", paterno);
+            CMD.Parameters.AddWithValue("@varcorreo", correo);
+            CMD.Parameters.AddWithValue("@varcontra", contra);
+
+            CMD.ExecuteNonQuery();
+        }
+    }
+    Response.Redirect("~/micuenta");
+
+}

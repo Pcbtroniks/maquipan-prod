@@ -1,0 +1,577 @@
+﻿@using System
+@using System.Web
+@using System.Globalization
+@using System.Configuration
+@using MySqlConnector
+
+@using MercadoPago
+@using MercadoPago.Config
+@using MercadoPago.Client.Preference
+@using MercadoPago.Resource.Preference
+@using MercadoPago.Client.Common
+
+@mSeguridad.CookieID()
+@{
+    string tipoCarrito = "carrito", zCoreNoOrden = "";
+    int cantArt = 0;
+    decimal grandTotal = 0, Total = 0;
+    bool haveAddress = false;
+}
+<!DOCTYPE html>
+<html lang="es-mx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title -->
+    <title>Carrito</title>
+    <link rel="stylesheet" href="~/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/assets/css/fontawesome.all.min.css" />
+    <link rel="stylesheet" href="~/assets/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="~/assets/css/owl.theme.default.min.css" />
+    <link rel="stylesheet" href="~/assets/css/animate.min.css" />
+    <link rel="stylesheet" href="~/assets/css/meanmenu.min.css" />
+    <link rel="stylesheet" href="~/assets/css/style.css" />
+    <link rel="stylesheet" href="~/assets/css/color.css" />
+    <link rel="stylesheet" href="~/assets/css/responsive.css" />
+    <link rel="icon" type="image/png" sizes="192x192" href="~/assets/img/favicon/ms-icon-310x310.png">
+
+    <link rel="manifest" href="assets/img/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="~/assets/img/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+    <script src="https://www.mercadopago.com/v2/security.js" view="checkout"></script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+
+    <!-- Referencias para plataforma de producci�n -->
+    <link rel="stylesheet" type="text/css" href="https://app.atratopago.com/ecommerce_plugin/highslide.css" />
+    <script type="text/javascript" src="https://app.atratopago.com/ecommerce_plugin/highslide-with-html.js"></script>
+    <script type="text/javascript" src="https://app.atratopago.com/ecommerce_plugin/highslide-config.js"></script>
+
+
+    <style>
+        .form-control {
+            font-size: 16px !important;
+        }
+
+        #wallet_container {
+            display: none;
+        }
+
+        .text-1XN644 {
+            color: white !important;
+        }
+
+        .zCardTitle {
+            background-color: #746757;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+            .zCardTitle td {
+                padding: 5px;
+            }
+
+        .zCardTotal {
+            font-size: 26px;
+            font-weight: 600;
+        }
+    </style>
+    @mAnalitica.AnaliticaGoogle()
+</head>
+
+<body>
+    <!-- Preloader Area -->
+    <div id="preloader">
+        <div id="status">
+            <img src="assets/img/loader.gif" alt="img">
+        </div>
+    </div>
+
+    @navegacion.Menu()
+
+    <!-- Cart-Area -->
+    <section id="cart_area_one" class="pt-4 mb-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-8 col-sm-12 col-12">
+                    <div class="table_desc">
+                        <table>
+                            <!-- Start Cart Table Head -->
+                            <thead class="zCardTitle" style="height: 33px;">
+                                <tr>
+                                    <th></th>
+                                    <th>Producto</th>
+                                    <th width="60"></th>
+                                    <th class="text-end">Precio</th>
+                                    <th class="text-end">Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead> <!-- End Cart Table Head -->
+                            <tbody>
+                                <!-- Start Cart Single Item-->
+                                @{
+
+                                    if (mOrdenes.haveOrderOpen())
+                                    {
+                                        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+                                        {
+                                            CONN.Open();
+                                            using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM artvent WHERE galleta = @varGalleta", CONN))
+                                            {
+                                                CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+                                                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                                                {
+                                                    while (DATOS.Read())
+                                                    {
+                                                        zCoreNoOrden = DATOS["orden"].ToString();
+                                                        tipoCarrito = "orden";
+                                                        cantArt++;
+                                                        Total = Convert.ToDecimal(DATOS["precio"].ToString()) * Convert.ToDecimal(DATOS["cantidad"].ToString());
+                                                        grandTotal = grandTotal + Total;
+                                                        <tr>
+                                                            <td>
+                                                                <img src="~/img/productos/@DATOS["id_art"]/1.jpg" alt="img" width="50">
+                                                            </td>
+                                                            <td>
+                                                                @DATOS["nombre"]
+                                                            </td>
+                                                            <td style="width: 120px;">
+                                                                <form method="post" enctype="multipart/form-data" action="~/zcore/ordenes/actualizar">
+                                                                    <input name="orden" value="@DATOS["orden"]" type="hidden" />
+                                                                    <input name="id_art" value="@DATOS["id_art"]" type="hidden" />
+                                                                    <input name="cantidad" class="form-control text-center" min="1" max="100" step="1" value="@Convert.ToDecimal(DATOS["cantidad"].ToString()).ToString("N0")" type="number" style="float: left; width: 70px;">
+                                                                    <button type="submit" style="float: left; background-color: white; padding: 4px; margin-top: 8px;"><img src="~/assets/webfonts/sync.png" width="20" /></button>
+                                                                </form>
+                                                            </td>
+                                                            <td class="text-end">$@Convert.ToDecimal(DATOS["precio"].ToString()).ToString("N2")</td>
+                                                            <td class="text-end">$@Total.ToString("N2")</td>
+                                                            <td width="25" style="padding: 8px;">
+                                                                <a href="~/zcore/ordenes/eliminar/@DATOS["orden"]/@DATOS["id_art"]"><i class="far fa-trash-alt"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+                                        {
+                                            CONN.Open();
+                                            using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM carrito WHERE galleta = @varGalleta", CONN))
+                                            {
+                                                CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+                                                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                                                {
+                                                    while (DATOS.Read())
+                                                    {
+                                                        tipoCarrito = "carrito";
+                                                        cantArt++;
+                                                        Total = Convert.ToDecimal(DATOS["precio"].ToString()) * Convert.ToDecimal(DATOS["cantidad"].ToString());
+                                                        grandTotal = grandTotal + Total;
+                                                        <tr>
+                                                            <td>
+                                                                <img src="~/img/productos/@DATOS["id_art"]/1.jpg" alt="img" width="50">
+                                                            </td>
+                                                            <td>
+                                                                @DATOS["nombre"]
+                                                            </td>
+                                                            <td style="width: 120px;">
+                                                                <form method="post" enctype="multipart/form-data" action="~/zcore/carrito/actualizar">
+                                                                    <input name="tipo" value="c" type="hidden" />
+                                                                    <input name="id_art" value="@DATOS["id_art"]" type="hidden" />
+                                                                    <input name="cantidad" class="form-control text-center" min="1" max="100" step="1" value="@Convert.ToDecimal(DATOS["cantidad"].ToString()).ToString("N0")" type="number" style="float: left; width: 70px;">
+                                                                    <button type="submit" style="float: left; background-color: white; padding: 4px; margin-top: 8px;"><img src="~/assets/webfonts/sync.png" width="20" /></button>
+                                                                </form>
+                                                            </td>
+                                                            <td class="text-end">$@Convert.ToDecimal(DATOS["precio"].ToString()).ToString("N2")</td>
+                                                            <td class="text-end">$@Total.ToString("N2")</td>
+                                                            <td width="25" style="padding: 8px;">
+                                                                <a href="~/zcore/carrito/eliminar/c/@DATOS["id_art"]"><i class="far fa-trash-alt"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <hr />
+                    @{
+                        if (cantArt >= 1)
+                        {
+                            <div class="coupon_code left" data-aos="fade-up" data-aos-delay="200">
+                                <h3 style="background-color: #746757;">Condiciones y ubicación de envio</h3>
+                                <div class="coupon_inner">
+                                    @{
+
+                                        if (mClientes.getInfoCliente("id", mClientes.ObtenerValorCookie("c")) == "")
+                                        {
+                                            <form action="~/zcore/clientes/ingresar" method="post">
+                                                <input name="origen" type="hidden" value="c">
+
+                                                <div class="form-group">
+                                                    <label>Correo <span>*</span></label>
+                                                    <input name="correo" type="text" class="form-control" style="width: 100%">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Contraseña <span>*</span></label>
+                                                    <input name="contra" type="password" class="form-control" style="width: 100%">
+                                                </div>
+                                                <div class="login_submit">
+                                                    <button class="theme-btn-one btn-black-overlay btn_md" type="submit">ingresar</button>
+                                                </div>
+
+                                                <div class="text-center pt-5">
+                                                    <a href="~/crear_usuario">¿Crear una cuenta?</a>
+                                                </div>
+
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            if (mClientes.haveAdress(mClientes.getInfoCliente("id", mClientes.ObtenerValorCookie("c"))))
+                                            {
+                                                haveAddress = true;
+                                                <table class="table">
+                                                    @{
+                                                        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+                                                        {
+                                                            CONN.Open();
+                                                            using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM fichas_ubicaciones WHERE id_cliente = @varId", CONN))
+                                                            {
+                                                                CMD.Parameters.AddWithValue("@varId", mClientes.getInfoCliente("id", mClientes.ObtenerValorCookie("c")));
+                                                                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                                                                {
+                                                                    while (DATOS.Read())
+                                                                    {
+                                                                        string predeterminado = DATOS["predeterminado"].ToString();
+                                                                        <tr>
+                                                                            <td style="width: 15px !important;">
+                                                                                @if (predeterminado == "1")
+                                                                                {
+                                                                                    <input checked type="radio" name="idubicacion" value="@DATOS["id"]" style="width: 15px;" />
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <input type="radio" name="idubicacion" value="@DATOS["id"]" style="width: 15px;" />
+                                                                                }
+                                                                            </td>
+                                                                            <td>
+                                                                                <div style="font-size: 18px;"><strong>@DATOS["calle"] @DATOS["exterior"] @DATOS["interior"]  </strong></div>
+                                                                                <small class="text-muted">@DATOS["estado"] @DATOS["municipio"] @DATOS["colonia"]  @DATOS["cp"]  </small>
+                                                                            </td>
+                                                                        </tr>
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+
+
+                                                    }
+                                                </table>
+                                            }
+                                            else
+                                            {
+                                                haveAddress = false;
+                                                <form id="agregarUbicacion" name="agregarUbicacion" method="post" enctype="multipart/form-data" action="~/zcore/clientes/ubicacion_insertar">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <input name="origen" type="hidden" value="c" />
+
+                                                            <label>Nombre <small class="text-muted">(Quien recibe)</small></label>
+                                                            <input name="nombre" class="form-control" style="width: 100%;" />
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <label>Calle</label>
+                                                            <input name="calle" class="form-control" style="width: 100%;" />
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label>No. Exterior</label>
+                                                            <input name="exterior" class="form-control" style="width: 100%;" />
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label>No. Interior</label>
+                                                            <input name="interior" class="form-control" style="width: 100%;" />
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label>Estado</label>
+                                                            <input name="estado" class="form-control" style="width: 100%;" />
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label>Municipio</label>
+                                                            <input name="municipio" class="form-control" style="width: 100%;" />
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label>Colonia</label>
+                                                            <input name="colonia" class="form-control" style="width: 100%;" />
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label>C.P</label>
+                                                            <input name="cp" class="form-control" style="width: 100%;" />
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <label>Cruces</label>
+                                                                <input name="cruces" class="form-control" style="width: 100%;" />
+                                                            </div>
+                                                            <div class="col-md-12">
+                                                                <label>Observaciones</label>
+                                                                <input name="observaciones" class="form-control" style="width: 100%;" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row" style="padding-top: 25px;">
+                                                            <div class="col-md-12">
+                                                                <button type="submit" class="btn btn-warning" style="color: white;">AGREGAR UBICACIÓN</button>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </form>
+                                            }
+
+                                        }
+
+
+                                    }
+                                </div>
+                            </div>
+
+                        }
+                    }
+
+                </div>
+
+                <div class="col-lg-4 col-md-4">
+                    <table width="100%">
+                        <tr class="zCardTitle">
+                            <td colspan="2">Información de la orden</td>
+                        </tr>
+                        <tr>
+                            <td>Ubicacion de entrega:</td>
+                            <td></td>
+                        </tr>
+                        <tr class="zCardTotal">
+                            <td>Total:</td>
+                            <td class="text-end">$@grandTotal.ToString("N2") mxn</td>
+                        </tr>
+                        @if (grandTotal >= 1)
+                        {
+                            <tr>
+                                <td colspan="2">
+                                    @{
+                                        if (tipoCarrito == "orden")
+                                        {
+
+                                            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                                            MercadoPagoConfig.IntegratorId = "dev_fda4d91e596211ea80ed0242ac130004";
+                                            MercadoPagoConfig.AccessToken = mConfiguraciones.getConfiguraciones("mpaccesstoken");
+
+                                            // CRAEMOS LA PREFERENCIA
+                                            PreferenceRequest preferencia = new PreferenceRequest()
+                                            {
+                                                AutoReturn = "approved",
+                                                StatementDescriptor = mCore.mEmpresa,
+                                                ExternalReference = mOrdenes.idOrderOpenGalleta(),
+                                                NotificationUrl = "https://" + mCore.mDominio + "/zcore/ipn",
+                                            };
+
+                                            preferencia.PaymentMethods = new PreferencePaymentMethodsRequest
+                                            {
+                                                ExcludedPaymentMethods = new List<PreferencePaymentMethodRequest> { },
+                                                ExcludedPaymentTypes = new List<PreferencePaymentTypeRequest> { new PreferencePaymentTypeRequest { Id = "atm", }, },
+                                                Installments = 6,
+                                            };
+
+                                            preferencia.Payer = new PreferencePayerRequest
+                                            {
+                                                Name = mClientes.getInfoCliente("nombre", mClientes.ObtenerValorCookie("c")),
+                                                Surname = mClientes.getInfoCliente("paterno", mClientes.ObtenerValorCookie("c")),
+                                                Email = mClientes.getInfoCliente("correo", mClientes.ObtenerValorCookie("c")),
+                                                Phone = new PhoneRequest
+                                                {
+                                                    AreaCode = "",
+                                                    Number = mClientes.getInfoCliente("telefono1", mClientes.ObtenerValorCookie("c")),
+                                                },
+                                            };
+
+                                            // PREFERENCIAS DE LIGAS BACKURLS
+                                            preferencia.BackUrls = new PreferenceBackUrlsRequest
+                                            {
+                                                Success = "https://" + mCore.mDominio + "/pago_aprobado",
+                                                Failure = "https://" + mCore.mDominio + "/carrito",
+                                                Pending = "https://" + mCore.mDominio + "/pago_aprobado"
+                                            };
+
+                                            // PREFERENCIAS DEL ITEM COMPRADO
+                                            preferencia.Items = new List<PreferenceItemRequest>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
+                                               new PreferenceItemRequest
+                                               {
+                                                    Id = mOrdenes.idOrderOpenGalleta(),
+                                                    Title = "Orden " + mOrdenes.idOrderOpenGalleta(),
+                                                    PictureUrl = "https://" + mCore.mDominio + "/img/logomp.jpg",
+                                                    Quantity = 1,
+                                                    CurrencyId = "MXN",
+                                                    UnitPrice = grandTotal
+                                                },
+                                            };
+
+                                            //Crea la preferencia usando el client
+                                            var client = new PreferenceClient();
+                                            Preference Preferencia = client.Create(preferencia);
+
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="" id="terminosCheck" required>
+                                                <label class="form-check-label" for="terminosCheck">
+                                                    Acepto los términos y condiciones de envío y pago
+                                                </label>
+                                            </div>
+
+                                            <script>
+                                                    const mp = new MercadoPago("@mConfiguraciones.getConfiguraciones("mppublickey")")
+                                                    const bricksBuilder = mp.bricks();
+                                                    mp.bricks().create("wallet", "wallet_container", {
+                                                        initialization: {
+                                                            preferenceId: "@Preferencia.Id",
+                                                        },
+                                                        customization: {
+                                                            texts: {
+                                                                valueProp: 'smart_option',
+                                                            },
+                                                        },
+                                                    });
+                                            </script>
+
+
+                                        }
+                                        else
+                                        {
+                                            <div class="form-check">
+                                                <a href="~/zcore/ordenes/generar" class="btn btn-success mt-2 mb-2" style="width: 100%;"> Siguiente</a>
+                                            </div>
+                                        }
+
+                                    }
+                                </td>
+                            </tr>
+                            if (tipoCarrito == "orden")
+                            {
+                                <tr>
+                                    <td colspan="2">
+                                        <div id="wallet_container"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <div id="wallet_atrato">
+                                            <div id="higslide-div-atrato-info"
+                                                 data-ordernumber="QUOTE"
+                                                 data-orderid="@zCoreNoOrden"
+                                                 data-idcommerce="313730372d33343638"
+                                                 data-key="bWFxdWlwYW46MTcwNw=="
+                                                 data-price="@grandTotal"
+                                                 data-product="Maquipan Venta"
+                                                 data-email="ejemplo@correo.com"
+                                                 data-name="Pedro Lopéz"
+                                                 data-phone="3313134494"
+                                                 data-plataform="other"
+                                                 data-type="pago"
+                                                 data-version="2"
+                                                 data-sandbox="false"
+                                                 data-urlhost="https://app.atratopago.com">
+                                            </div>
+                                            <div id="messageData"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- footer Area -->
+    @navegacion.Footer()
+
+    <!-- Jquery -->
+    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+    <script src="~/assets/js/popper.min.js"></script>
+    <script src="~/assets/js/bootstrap.min.js"></script>
+    <script src="~/assets/js/owl.carousel.min.js"></script>
+    <script src="~/assets/js/meanmenu.min.js"></script>
+    <script src="~/assets/js/img-upload.js"></script>
+    <script src="~/assets/js/count.js"></script>
+    <script src="~/assets/js/wow.min.js"></script>
+    <script src="~/assets/js/custom.js"></script>
+    <script src="~/zcore/js/buscador.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#wallet_container').hide();
+            $('#wallet_atrato').hide();
+
+            // Detectar el cambio en el checkbox
+            $('#terminosCheck').on('change', function () {
+                // Verificar si el checkbox está marcado
+                if ($(this).is(':checked')) {
+                    // Mostrar #wallet_container si el checkbox está marcado
+                    $('#wallet_container').show();
+                    $('#wallet_atrato').show();
+                } else {
+                    // Ocultar #wallet_container si el checkbox no está marcado
+                    $('#wallet_container').hide();
+                    $('#wallet_atrato').hide();
+                }
+            });
+        });
+    </script>
+    <script>
+        function showMessage(textMessage) {
+            document.getElementById("messageData").innerHTML = textMessage;
+            return false;
+        }
+        new window.Atrato_Pago_Events({
+            onSuccess: (data) => {
+                setTimeout(function () {
+                    location.href = "atratoaprobado.cshtml"; // Url de redirecci�n
+                }, 4000);
+            },
+            onPending: (data) => {
+
+
+            },
+            onError: (error) => {
+                setTimeout(function () {
+                    location.href = "atratoerror.cshtml"; // Url de redirecci�n
+                }, 4000);
+            },
+            onRejected: (data) => {
+                setTimeout(function () {
+                    location.href = "atratorechzado.cshtml"; // Url de redirecci�n
+                }, 4000);
+            },
+        });
+    </script>
+</body>
+
+</html>

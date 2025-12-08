@@ -1,0 +1,227 @@
+﻿@using System
+@using System.Globalization
+@using System.Configuration
+@using MySqlConnector
+
+@{
+	var id = UrlData[0];
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title -->
+    <title>Editar ubicación MAQUIPAN</title>
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="~/assets/css/bootstrap.min.css">
+    <!-- Fontawesome css -->
+    <link rel="stylesheet" href="~/assets/css/fontawesome.all.min.css">
+    <!-- owl.carousel css -->
+    <link rel="stylesheet" href="~/assets/css/owl.carousel.min.css">
+    <!-- owl.theme.default css -->
+    <link rel="stylesheet" href="~/assets/css/owl.theme.default.min.css">
+    <!-- lineProgressbar css -->
+    <link rel="stylesheet" href="~/assets/css/jquery.lineProgressbar.css">
+    <!-- animate css -->
+    <link rel="stylesheet" href="~/assets/css/animate.min.css">
+    <!-- Style css -->
+    <link rel="stylesheet" href="~/assets/css/style.css">
+    <!-- color css -->
+    <link rel="stylesheet" href="~/assets/css/color.css">
+    <!-- Responsive css -->
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    <link rel="apple-touch-icon" sizes="57x57" href="~/assets/img/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="~/assets/img/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="~/assets/img/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="~/assets/img/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="~/assets/img/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="~/assets/img/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="~/assets/img/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="~/assets/img/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/assets/img/favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="~/assets/img/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/assets/img/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="~/assets/img/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/assets/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="~/assets/img/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="~/assets/img/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    @mAnalitica.AnaliticaGoogle()
+</head>
+
+<body>
+    <!-- Preloader Area -->
+
+    @navegacion.Menu()
+    <!-- Banner Area -->
+    <section id="common_banner_one" style="background-image: url(/img/secciones/b_nosotros.jpg)">
+        <div class="container ">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="common_banner_text">
+                        <h2>Editar ubicación</h2>
+                        <ul>
+                            <li><a href="index.html">Inicio</a></li>
+                            <li><i class="fas fa-slash"></i></li>
+                            <li class="active">Editar ubicación</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Account Info Edit Area  -->
+    <section id="account_edit" class="pt-100">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                </div>
+                <div class="col-lg-9 pb-100">
+                    <div class="account_setting">
+                        <div class="account_setting_heading">
+                            <h2>Actualizar ubicación</h2>
+                            <p>Cambia de dirección o algún otro dato dentro de esta sección.</p>
+                        </div>
+                        @{
+
+								using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+								{
+								CONN.Open();
+								using (var CMD = new MySqlCommand("SELECT * FROM fichas_ubicaciones WHERE id = @id", CONN))
+								{
+
+								CMD.Parameters.AddWithValue("@id", id);
+
+								var DATOS = CMD.ExecuteReader();
+								while (DATOS.Read())
+								{
+
+                                        <form action="~/zcore/clientes/ubicacion_actualizar" method="post" id="account_info_form">
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <input type="text" name="id" value="@id" hidden />
+                                                    <div class="col-md-6">
+                                                        <label for="f_name">Nombre y apellido del destinatario</label>
+                                                        <input type="text" name="nombre" class="form-control" id="f_name" value="@DATOS["nombre"]" maxlength="32" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="f_name">Calle</label>
+                                                        <input type="text" name="calle" class="form-control" value="@DATOS["calle"]" maxlength="128" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="f_name">Exterior</label>
+                                                        <input type="text" name="exterior" class="form-control" value="@DATOS["exterior"]" maxlength="12">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="f_name">Interior</label>
+                                                        <input type="text" name="interior" class="form-control" value="@DATOS["interior"]" maxlength="12">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="f_name">Estado</label>
+                                                        <input type="text" name="estado" class="form-control" value="@DATOS["estado"]" maxlength="64" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="f_name">Municipio</label>
+                                                        <input type="text" name="municipio" class="form-control" value="@DATOS["municipio"]" max="128" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="f_name">Colonia</label>
+                                                        <input type="text" name="colonia" class="form-control" value="@DATOS["colonia"]" max="128" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="f_name">Código Postal (CP)</label>
+                                                        <input type="text" name="cp" class="form-control" value="@DATOS["cp"]" maxlength="7" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="f_name">Cruces</label>
+                                                        <input type="text" name="cruces" class="form-control" value="@DATOS["cruces"]" maxlength="128" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="f_name">Observaciones</label>
+                                                        <input type="text" name="observaciones" class="form-control" value="@DATOS["observaciones"]" maxlength="128">
+                                                    </div>
+                                                    <div class="col-lg-12">
+                                                        <small>
+                                                            *Asegúrate de llenar la información faltante en caso de que sea necesaria.
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <a href="~/micuenta" class="theme-btn-one bg-black btn_sm">Regresar</a>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button type="submit" class="theme-btn-one bg-black btn_sm">Actualizar infrmación</button>
+                                                </div>
+                                                <div class="col-md-4"></div>
+                                                <div class="col-md-2">
+                                                    <button type="button" class="theme-btn-one bg-red btn_sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop">ELIMINAR</button>
+                                                </div>
+                                            </div>
+
+
+
+
+                                        </form>
+
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="staticBackdropLabel">Eliminar ubicación</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        ¿Está seguro de que desea eliminar esta ubicación? En caso de que no lo desee, haga clic en el botón de cancelar.
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <a href="~/zcore/clientes/ubicacion_eliminar/@DATOS["id"]" class="btn btn-primary">Eliminar</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                }
+
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- footer Area -->
+    @navegacion.Footer()
+
+
+
+    <!-- Jquery -->
+    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap js -->
+    <script src="~/assets/js/popper.min.js"></script>
+    <script src="~/assets/js/bootstrap.min.js"></script>
+    <!-- owl carousel js -->
+    <script src="assets/js/owl.carousel.min.js"></script>
+    <!-- Menu js -->
+    <script src="~/assets/js/meanmenu.min.js"></script>
+    <!-- Count js -->
+    <script src="assets/js/count.js"></script>
+    <!-- wow.js -->
+    <script src="~/assets/js/wow.min.js"></script>
+    <!-- Custom js -->
+    <script src="~/assets/js/custom.js"></script>
+    <script src="~/zcore/js/buscador.js"></script>
+</body>
+
+</html>

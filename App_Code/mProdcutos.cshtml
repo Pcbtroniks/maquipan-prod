@@ -1,0 +1,79 @@
+@using System
+@using System.Web
+@using System.Configuration
+@using MySqlConnector
+
+@helper inicioProdcutosPrincipal(string tipo, string cantidad)
+{
+    try
+    {
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["sDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM catart WHERE activo = '1' ORDER BY RAND() LIMIT " + cantidad, CONN))
+            {
+                MySqlDataReader DATOS = CMD.ExecuteReader();
+                while (DATOS.Read())
+                {
+                    <div class="col-xxl-3 col-lg-3 col-md-3 col-12 trending">
+                        <div class="vr6-product-card">
+                            <div class="feature-image position-relative">
+                                <a href="~/producto/@DATOS["urlf"]">
+                                    <img src="~/img/productos/@DATOS["id"]/1.jpg" alt="thumbnail" class="feature-thumbnail thumb img-fluid" />
+                                    <img src="~/img/productos/@DATOS["id"]/1.jpg" alt="thumbnail" class="feature-thumbnail thumb-hover" />
+                                </a>
+                            </div>
+                            <div class="vr6-product-card-content">
+                                <span>@DATOS["cate"]</span>
+                                <a href="~/producto/@DATOS["urlf"]"><h6 class="fw-semibold" style="font-size: 14px; line-height: 16px;">@DATOS["nombre"]</h6></a>
+                                <div class="pricing">
+                                    <span style="font-size: 20px;">@Convert.ToDecimal(DATOS["precio"].ToString()).ToString("N2")</span>
+                                </div>
+                                <a href="~/producto/@DATOS["urlf"]" class="template-btn white-btn mt-4">ver mas...</a>
+                            </div>
+                        </div>
+                    </div>
+
+                }
+            }
+        }
+
+    }
+    catch (Exception ex)
+    {
+
+    }
+}
+
+
+@functions {
+
+    public static string infoCatart(string columna, string key, string valor)
+    {
+        string respuesta = "";
+        try
+        {
+            using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+            {
+                CONN.Open();
+                using (MySqlCommand CMD = new MySqlCommand("SELECT @varColumna FROM catart WHERE @varKey = @varValor  LIMIT 1", CONN))
+                {
+                    CMD.Parameters.AddWithValue("@varColumna", columna);
+                    CMD.Parameters.AddWithValue("@varKey", key);
+                    CMD.Parameters.AddWithValue("@varValor", valor);
+                    MySqlDataReader DATOS = CMD.ExecuteReader();
+                    while (DATOS.Read())
+                    {
+                        respuesta = DATOS[columna].ToString();
+                    }
+                }
+            }
+        }
+        catch (MySqlException ex)
+        {
+
+        }
+        return respuesta;
+    }
+
+}

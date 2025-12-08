@@ -1,0 +1,39 @@
+@using System
+@using System.Web
+@using System.Configuration
+@using System.Globalization
+@using MySql.Data.MySqlClient
+
+@{
+
+    string tipo = UrlData[0].ToString();
+    string id_art = UrlData[1].ToString();
+    string iorden = UrlData[2].ToString();
+
+    try
+    {
+        switch (tipo)
+        {
+            case "c":
+                using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+                {
+                    CONN.Open();
+                    using (MySqlCommand CMD = new MySqlCommand("DELETE FROM carrito WHERE id_art = @varIdArt AND galleta = @varGalleta LIMIT 1", CONN))
+                    {
+                        CMD.Parameters.AddWithValue("@varIdArt", id_art);
+                        CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+                        CMD.ExecuteReader();
+                    }
+                }
+                break;
+            case "o":
+
+                break;
+        }
+        Response.Redirect("~/carrito");
+    }
+    catch (MySqlException ex)
+    {
+        Response.Write(ex.Message);
+    }
+}

@@ -1,0 +1,32 @@
+@using System
+@using System.Configuration
+@using MySqlConnector
+
+@functions{
+
+    public static string getConfiguraciones(string columna)
+    {
+        string dato = "";
+        try
+        {
+            using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+            {
+                CONN.Open();
+                using (var CMD = new MySqlCommand("SELECT nombre, " + columna + " FROM configuraciones WHERE nombre = 'config'", CONN))
+                {
+                    var DATOS = CMD.ExecuteReader();
+                    while (DATOS.Read())
+                    {
+                        dato = DATOS[columna].ToString();
+                    }
+                }
+            }
+        }
+        catch (MySqlException ex)
+        {
+            dato = ex.Message;
+        }
+        return dato;
+    }
+
+}

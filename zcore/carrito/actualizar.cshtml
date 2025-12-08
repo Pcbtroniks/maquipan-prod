@@ -1,0 +1,64 @@
+@using System
+@using System.Web
+@using System.Globalization
+@using System.Configuration
+@using MySql.Data.MySqlClient
+
+@mSeguridad.CookieID()
+
+@{
+
+
+    try
+    {
+        string tipo = Request.Form["tipo"];
+        string id_art = Request.Form["id_art"];
+        string cantidad = Request.Form["cantidad"];
+
+        if (tipo == "o")
+        {
+            actualizarOrden();
+        }
+        else
+        {
+            actualizarCarrito(id_art, cantidad);
+        }
+
+        Response.Redirect("/carrito");
+        Context.ApplicationInstance.CompleteRequest();
+
+    }
+    catch (Exception)
+    {
+
+        throw;
+    }
+
+
+}
+
+@functions{
+
+    private static void actualizarCarrito(string id_art, string cantidad)
+    {
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("UPDATE carrito SET cantidad = @varCantidad WHERE id_art = @varIdART AND galleta = @varGalleta", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varCantidad", cantidad);
+                CMD.Parameters.AddWithValue("@varIdART", id_art);
+                CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+                CMD.ExecuteNonQuery();
+            }
+        }
+
+
+    }
+
+    private static void actualizarOrden()
+    {
+
+    }
+
+}

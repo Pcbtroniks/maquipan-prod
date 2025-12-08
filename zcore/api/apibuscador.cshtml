@@ -1,0 +1,60 @@
+@using System
+@using System.Configuration
+@using MySqlConnector
+@using Newtonsoft.Json
+
+@{
+    try
+    {
+        // Crear la lista de respuestas
+        List<Respuesta> _respuesta = new List<Respuesta>();
+
+        string busqueda = Request.Form["busqueda"].ToString();
+
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            string query = "SELECT * FROM catart WHERE nombre LIKE @valorBusqueda AND activo = '1'";
+
+            using (MySqlCommand CMD = new MySqlCommand(query, CONN))
+            {
+                CMD.Parameters.AddWithValue("@valorBusqueda", "%" + busqueda + "%");
+                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                {
+                    while (DATOS.Read())
+                    {
+                        Respuesta nrespuesta = new Respuesta()
+                        {
+                            id = DATOS["id"].ToString(),
+                            nombre = DATOS["nombre"].ToString(),
+                            urlf = DATOS["urlf"].ToString(),
+                            precio = Convert.ToDecimal(DATOS["precio"]).ToString("N2")
+                        };
+                        _respuesta.Add(nrespuesta);
+                    }
+                }
+            }
+        }
+
+        // Configurar el tipo de contenido y enviar la respuesta JSON
+        Response.ContentType = "application/json";
+        Response.Write(JsonConvert.SerializeObject(_respuesta));
+    }
+    catch (MySqlException ex)
+    {
+        // Manejar errores aquí
+        Response.ContentType = "application/json";
+        Response.StatusCode = 500; // Código de error interno del servidor
+        Response.Write(JsonConvert.SerializeObject(new { error = ex.Message }));
+    }
+}
+
+@functions {
+    private class Respuesta
+    {
+        public string id { get; set; }
+        public string nombre { get; set; }
+        public string urlf { get; set; }
+        public string precio { get; set; }
+    }
+}

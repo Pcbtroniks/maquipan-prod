@@ -1,0 +1,154 @@
+@using System
+@using System.Web
+@using System.Configuration
+@using System.Globalization
+@using MySql.Data.MySqlClient
+
+@{
+    // CORE 4 | 24 SEP 2021 | ANDRES N C
+
+    string sid = Request.Form["id"].ToString();
+    string scant = Request.Form["ca"].ToString();
+
+    if (mClientes.ObtenerValorCookie("c") != "")
+    {
+        using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (var CMD = new MySqlCommand("SELECT * FROM carrito WHERE galleta = @cookie AND id_art = @idArt ORDER BY galleta ASC LIMIT 1", CONN))
+            {
+                CMD.Parameters.AddWithValue("@cookie", mClientes.ObtenerValorCookie("c"));
+                CMD.Parameters.AddWithValue("@idArt", sid);
+
+                using (var reader = CMD.ExecuteReader())
+                {
+                    if (!reader.HasRows)
+                    {
+                        readCatart(sid, scant);
+                    }
+                    else
+                    {
+                        updateCart(sid, scant);
+                    }
+                }
+            }
+        }
+    }
+
+    Response.Redirect("~/carrito");
+
+}
+
+@functions{
+
+    private static void updateCart(string sid, string scant) {
+
+        using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            // Ya existe un registro, se actualiza la cantidad
+            using (var CMDUpdate = new MySqlCommand("UPDATE carrito SET cantidad = cantidad + @varScant WHERE galleta = @varCookie AND idtallacolor = @varIdArt", CONN))
+            {
+                CMDUpdate.Parameters.AddWithValue("@varScant", scant);
+                CMDUpdate.Parameters.AddWithValue("@varCookie", mClientes.ObtenerValorCookie("c"));
+                CMDUpdate.Parameters.AddWithValue("@varIdArt", sid);
+
+                CMDUpdate.ExecuteNonQuery();
+            }
+        }
+
+    }
+
+    private static void readCatart(string sid, string scant)
+    {
+        using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            // No se encontraron resultados, se puede ejecutar la consulta para obtener datos
+            using (var CMDInsert = new MySqlCommand("SELECT * FROM catart WHERE id = @varIdArt", CONN))
+            {
+                CMDInsert.Parameters.AddWithValue("@varIdArt", sid);
+
+                using (var datos = CMDInsert.ExecuteReader())
+                {
+                    while (datos.Read())
+                    {
+                        insertarCarrito(datos["id"].ToString(), datos["codigo"].ToString(), datos["nombre"].ToString(), datos["precio"].ToString(), scant, "", "", "", datos["id"].ToString(), mClientes.ObtenerValorCookie("c"), "", "", "", "");
+                    }
+                }
+            }
+        }
+
+    }
+
+    private static void insertarCarrito(string id_art, string codigo, string nombre, string precio, string cantidad, string observacion, string talla, string color, string idtallacolor, string galleta, string alto, string ancho, string fondo, string peso)
+    {
+        // CALCULAMOS EL PESO VOLUMETRICO SEGUN CANTIDAD DE PRODUCTOS
+        decimal PesoV = 0;
+        decimal PesoF = 0;
+
+        try
+        {
+            PesoV = ((Convert.ToDecimal(ancho) * Convert.ToDecimal(alto) * Convert.ToDecimal(fondo)) / 5000) * Convert.ToDecimal(cantidad);
+            PesoF = ((Convert.ToDecimal(peso)) * (Convert.ToDecimal(cantidad)));
+        }
+        catch (Exception ex)
+        {
+            HttpContext.Current.Response.Write("info:" + ex.Message);
+            PesoV = 0;
+            PesoF = 0;
+        }
+
+        if (mOrdenes.haveOrderOpen())
+        {
+            using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+            {
+                CONN.Open();
+                using (MySqlCommand CMD = new MySqlCommand("INSERT INTO artvent (orden, id_art, codigo, nombre, precio, cantidad, observacion, talla, color, cate, galleta) VALUES (@orden, @idArticulo, @codigo, @nombre, @precio, @cantidad, @observacion, @talla, @color, @categoria, @varGalleta)", CONN))
+                {
+                    CMD.Parameters.AddWithValue("@orden", mOrdenes.idOrderOpenGalleta());
+                    CMD.Parameters.AddWithValue("@idArticulo", id_art);
+                    CMD.Parameters.AddWithValue("@codigo", codigo);
+                    CMD.Parameters.AddWithValue("@nombre", nombre);
+                    CMD.Parameters.AddWithValue("@precio", precio);
+                    CMD.Parameters.AddWithValue("@cantidad", cantidad);
+                    CMD.Parameters.AddWithValue("@observacion", observacion);
+                    CMD.Parameters.AddWithValue("@talla", talla);
+                    CMD.Parameters.AddWithValue("@color", color);
+                    CMD.Parameters.AddWithValue("@categoria", "");
+                    CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+
+                    CMD.ExecuteNonQuery();
+                }
+            }
+        }
+        else
+        {
+            using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+            {
+                CONN.Open();
+                using (var CMD = new MySqlCommand("INSERT INTO carrito (id_art, codigo, nombre, precio, cantidad, observacion, talla, color, idtallacolor, galleta, ecweight, ecweightf, echeight, ecwidth, eclength, fecha) VALUES(@IdArt, @Codigo, @Nombre, @Precio, @Cantidad, @Observacion, @Talla, @Color, @IdTallaColor, @Galleta, @EcWeight, @EcWeightF, @EcHeight, @EcWidth, @EcLength, NOW())", CONN))
+                {
+                    CMD.Parameters.AddWithValue("@IdArt", id_art);
+                    CMD.Parameters.AddWithValue("@Codigo", codigo);
+                    CMD.Parameters.AddWithValue("@Nombre", nombre);
+                    CMD.Parameters.AddWithValue("@Precio", precio);
+                    CMD.Parameters.AddWithValue("@Cantidad", cantidad);
+                    CMD.Parameters.AddWithValue("@Observacion", observacion);
+                    CMD.Parameters.AddWithValue("@Talla", talla);
+                    CMD.Parameters.AddWithValue("@Color", color);
+                    CMD.Parameters.AddWithValue("@IdTallaColor", idtallacolor);
+                    CMD.Parameters.AddWithValue("@Galleta", galleta);
+                    CMD.Parameters.AddWithValue("@EcWeight", PesoV.ToString("N2"));
+                    CMD.Parameters.AddWithValue("@EcWeightF", PesoF.ToString("N2"));
+                    CMD.Parameters.AddWithValue("@EcHeight", alto);
+                    CMD.Parameters.AddWithValue("@EcWidth", ancho);
+                    CMD.Parameters.AddWithValue("@EcLength", fondo);
+
+                    CMD.ExecuteNonQuery();
+                }
+            }
+        }
+
+    }
+}

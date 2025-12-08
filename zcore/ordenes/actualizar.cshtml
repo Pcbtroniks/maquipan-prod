@@ -1,0 +1,49 @@
+@using System
+@using System.Web
+@using System.Globalization
+@using System.Configuration
+@using MySql.Data.MySqlClient
+
+@mSeguridad.CookieID()
+
+@{
+
+
+    try
+    {
+        string id_orden = Request.Form["orden"];
+        string id_art = Request.Form["id_art"];
+        string cantidad = Request.Form["cantidad"];
+
+        actualizarOrden(id_orden, id_art, cantidad);
+
+        Response.Redirect("/carrito");
+        Context.ApplicationInstance.CompleteRequest();
+
+    }
+    catch (MySqlException ex)
+    {
+
+    }
+
+
+}
+
+@functions{
+
+    private static void actualizarOrden(string orden, string id_art, string cantidad)
+    {
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("UPDATE artvent SET cantidad = @varCantidad WHERE id_art = @varIdART AND orden = @varOrden", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varCantidad", cantidad);
+                CMD.Parameters.AddWithValue("@varIdART", id_art);
+                CMD.Parameters.AddWithValue("@varOrden", orden);
+                CMD.ExecuteNonQuery();
+            }
+        }
+    }
+
+}

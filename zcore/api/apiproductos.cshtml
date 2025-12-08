@@ -1,0 +1,114 @@
+@using System
+@using System.IO
+@using System.Web
+@using System.Configuration
+@using System.Threading.Tasks
+@using MySqlConnector
+@using Newtonsoft.Json.Linq
+@using System.Text.RegularExpressions
+
+
+@{
+
+    List<Respuesta> respuesta = new List<Respuesta>();
+    string JsonTest = "";
+
+    string sandbox = "", query = "";
+    string cate = "";
+    string subcate = "";
+
+
+    try
+    {
+        //--------------------------------------------------------------- RECIBIMOS LOS CAMPOS DE ACCESO
+        HttpContext httpContext = HttpContext.Current;
+        var requestBody = "";
+        using (var reader = new StreamReader(httpContext.Request.InputStream))
+        {
+            requestBody = reader.ReadToEnd();
+
+            JsonTest = requestBody;
+        }
+
+        // Decodificar la cadena URL
+        string decodedRequestBody = HttpUtility.UrlDecode(requestBody);
+
+        // Parsear el cuerpo decodificado como un objeto JObject
+        JObject data = JObject.Parse(decodedRequestBody);
+
+
+        cate = data["cate"].ToString();
+        subcate = data["subcate"].ToString();
+
+
+
+
+
+        //--------------------------------------------------------------- VALIDAMOS EL TOKEN DE ACCESO
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+
+
+            if (subcate == "todo")
+            {
+                query = "SELECT id, urlf, nombre, precio, pre_promo, cate, subcate, hot, activo FROM catart WHERE activo = '1' AND (cate = @varCate OR cate2 = @varCate OR cate3 = @varCate OR cate4 = @varCate OR cate5 = @varCate) ORDER BY nombre ASC";
+            }
+            else
+            {
+                query = "SELECT id, urlf, nombre, precio, pre_promo, cate, subcate, hot, activo FROM catart WHERE activo = '1' AND (subcate = @varSubCate OR subcate2 = @varSubCate OR subcate3 = @varSubCate OR subcate4 = @varSubCate OR subcate5 = @varSubCate) ORDER BY nombre ASC";
+            }
+
+            using (MySqlCommand CMD = new MySqlCommand(query, CONN))
+            {
+                CMD.Parameters.AddWithValue("@varCate", cate);
+                CMD.Parameters.AddWithValue("@varSubCate", subcate);
+
+                MySqlDataReader DATOS = CMD.ExecuteReader();
+                while (DATOS.Read())
+                {
+                    Respuesta newRespuesta = new Respuesta();
+
+                    newRespuesta.id = DATOS["id"].ToString();
+                    newRespuesta.urlf = DATOS["urlf"].ToString();
+                    newRespuesta.nombre = DATOS["nombre"].ToString();
+                    newRespuesta.precio = Convert.ToDecimal(DATOS["precio"].ToString()).ToString("N2");
+                    newRespuesta.promo = Convert.ToDecimal(DATOS["pre_promo"].ToString()).ToString("N2");
+                    newRespuesta.cate = DATOS["cate"].ToString();
+                    newRespuesta.subcate = DATOS["subcate"].ToString();
+                    newRespuesta.hot = DATOS["hot"].ToString();
+
+                    respuesta.Add(newRespuesta);
+                }
+
+            }
+        }
+
+        var JsonResponse = Json.Encode(respuesta);
+        Response.ContentType = "application/json";
+        Response.Write(JsonResponse);
+
+
+    }
+    catch (Exception ex)
+    {
+        Response.Write(ex.Message);
+    }
+}
+
+@functions{
+
+
+    public class Respuesta
+    {
+        public string id { set; get; }
+        public string urlf { set; get; }
+        public string nombre { set; get; }
+        public string precio { set; get; }
+        public string promo { set; get; }
+        public string cate { set; get; }
+        public string subcate { set; get; }
+        public string hot { set; get; }
+    }
+
+}

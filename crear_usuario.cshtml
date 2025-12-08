@@ -1,0 +1,194 @@
+﻿@mSeguridad.CookieID()
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Title -->
+	<title>Crear usuario</title>
+	<!-- Bootstrap css -->
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+	<!-- Fontawesome css -->
+	<link rel="stylesheet" href="assets/css/fontawesome.all.min.css" />
+	<!-- owl.carousel css -->
+	<link rel="stylesheet" href="assets/css/owl.carousel.min.css" />
+	<!-- owl.theme.default css -->
+	<link rel="stylesheet" href="assets/css/owl.theme.default.min.css" />
+	<!-- animate css -->
+	<link rel="stylesheet" href="assets/css/animate.min.css" />
+	<!-- meanmenu css -->
+	<link rel="stylesheet" href="assets/css/meanmenu.min.css" />
+	<!-- Style css -->
+	<link rel="stylesheet" href="assets/css/style.css" />
+	<!-- color css -->
+	<link rel="stylesheet" href="assets/css/color.css" />
+	<!-- Responsive css -->
+	<link rel="stylesheet" href="assets/css/responsive.css" />
+	<link rel="apple-touch-icon" sizes="57x57" href="assets/img/favicon/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="assets/img/favicon/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="assets/img/favicon/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="assets/img/favicon/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="assets/img/favicon/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="assets/img/favicon/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="assets/img/favicon/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="assets/img/favicon/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicon/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192" href="assets/img/favicon/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon/favicon-16x16.png">
+	<link rel="manifest" href="assets/img/favicon/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="assets/img/favicon/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+	<style>
+		.password-container {
+			position: relative;
+			display: flex;
+			align-items: center;
+		}
+
+			.password-container .eye-icon {
+				position: absolute;
+				right: 10px;
+				cursor: pointer;
+				font-size: 1.2em;
+			}
+	</style>
+
+	@mAnalitica.AnaliticaGoogle()
+</head>
+
+<body>
+	<!-- Preloader Area -->
+	<div id="preloader">
+		<div id="status">
+			<img src="assets/img/loader.gif" alt="img">
+		</div>
+	</div>
+
+	@navegacion.Menu()
+
+	<!-- Banner Area -->
+	<section id="common_banner_one" style="background-image: url(/img/secciones/b_nosotros.jpg)">
+		<div class="container ">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="common_banner_text">
+						<h2>Crear cuenta</h2>
+						<ul>
+							<li><a href="~/">Inicio</a></li>
+							<li><i class="fas fa-slash"></i></li>
+							<li class="active">Crear cuenta</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- My-account-area-Area -->
+	<section id="login_area" class="ptb-100">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-6 offset-lg-3 col-md-12 col-sm-12 col-12">
+					<div class="account_form">
+						<h3>Crear cuenta</h3>
+						<form action="~/zcore/clientes/registro" method="post">
+							<input name="origen" type="hidden" class="form-control" value="">
+
+							<div class="default-form-box">
+								<label>Nombre <span>*</span></label>
+								<input name="nombre" type="text" class="form-control" required>
+							</div>
+							<div class="default-form-box">
+								<label>Correo <span>*</span></label>
+								<input name="correo" type="email" class="form-control" required>
+							</div>
+							<div class="default-form-box">
+								<label>Contraseña <span>*</span></label>
+								<div class="password-container">
+									<input id="password" name="contra" type="password" class="form-control" required>
+									<span class="material-symbols-outlined eye-icon" onclick="togglePasswordVisibility('password')">
+										visibility
+									</span>
+								</div>
+							</div>
+
+							<div class="default-form-box">
+								<label>Confirmar contraseña <span>*</span></label>
+								<div class="password-container">
+									<input id="confirm-password" name="ccontra" type="password" class="form-control" required>
+									<span class="material-symbols-outlined eye-icon" onclick="togglePasswordVisibility('confirm-password')">
+										visibility
+									</span>
+								</div>
+							</div>
+
+							<div class="col-md-12">
+								<div id="password-error" style="color: darkred; display: none;">Las contraseñas no coinciden.</div>
+								<div style="color: darkred;">@Session["mi_perfil_existe"]</div>
+							</div>
+							<div class="login_submit">
+								<button id="submit-button" class="theme-btn-one btn-black-overlay btn_md" type="submit" disabled>Crear</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- footer Area -->
+	@navegacion.Footer()
+
+	<script src="~/assets/js/jquery-3.6.0.min.js"></script>
+	<script src="~/assets/js/popper.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/assets/js/owl.carousel.min.js"></script>
+	<script src="~/assets/js/meanmenu.min.js"></script>
+	<script src="~/assets/js/count.js"></script>
+	<script src="~/assets/js/timer.js"></script>
+	<script src="~/assets/js/nice-select.min.js"></script>
+	<script src="~/assets/js/wow.min.js"></script>
+	<script src="~/assets/js/custom.js"></script>
+	<script src="~/zcore/js/buscador.js"></script>
+
+	<script>
+		function togglePasswordVisibility(inputId) {
+			const input = document.getElementById(inputId);
+			const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+			input.setAttribute('type', type);
+		}
+
+		$(document).ready(function () {
+			$('#password, #confirm-password').on('input', function () {
+				const password = $('#password').val();
+				const confirmPassword = $('#confirm-password').val();
+
+				if (password === confirmPassword && password.length > 0) {
+					$('#password-error').hide();
+					$('#submit-button').prop('disabled', false);
+				} else {
+					$('#password-error').show();
+					$('#submit-button').prop('disabled', true);
+				}
+			});
+		});
+	</script>
+
+	<script>
+		function togglePasswordVisibility(inputId) {
+			const input = document.getElementById(inputId);
+			if (input.type === "password") {
+				input.type = "text";
+			} else {
+				input.type = "password";
+			}
+		}
+	</script>
+</body>
+</html>

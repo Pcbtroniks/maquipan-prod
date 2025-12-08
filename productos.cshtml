@@ -1,0 +1,247 @@
+﻿@using System
+@using System.Configuration
+@using MySqlConnector
+
+@{
+    //------------------------------- COOKIE
+    mSeguridad.CookieID();
+
+    string cate = UrlData[0];
+    string subcate = UrlData[1];
+    if (subcate == "")
+    {
+        subcate = "todo";
+    }
+}
+
+
+<!DOCTYPE html>
+<html lang="es-mx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <!-- Title -->
+    <title>Productos</title>
+    <meta name="description" content="Somos distribuidores de marcas reconocidas a nivel nacional e internacional de maquinaria esencial para equipar panaderías, pizzerías, reposterías, cafeterías, restaurantes y hoteles; además de ser especialistas en la fabricación de hornos de gaveta de alta calidad.">
+    <link rel="canonical" href="https://maquipan.com.mx/productos" />
+
+    <meta property="og:title" content="Productos" />
+    <meta property="og:description" content="Somos distribuidores de marcas reconocidas a nivel nacional e internacional de maquinaria esencial para equipar panaderías, pizzerías, reposterías, cafeterías, restaurantes y hoteles; además de ser especialistas en la fabricación de hornos de gaveta de alta calidad." />
+    <meta property="og:image" content="https://maquipan.com.mx/img/img_redes.jpg" />
+    <meta property="og:url" content="https://maquipan.com.mx/productos" />
+
+
+    <link rel="stylesheet" href="~/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/assets/css/fontawesome.all.min.css" />
+    <link rel="stylesheet" href="~/assets/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="~/assets/css/owl.theme.default.min.css" />
+    <link rel="stylesheet" href="~/assets/css/jquery.lineProgressbar.css" />
+    <link rel="stylesheet" href="~/assets/css/animate.min.css" />
+    <link rel="stylesheet" href="~/assets/css/meanmenu.min.css" />
+    <link rel="stylesheet" href="~/assets/css/style.css" />
+    <link rel="stylesheet" href="~/assets/css/color.css" />
+    <link rel="stylesheet" href="~/assets/css/responsive.css" />
+    <link rel="icon" type="image/png" sizes="192x192" href="~/assets/img/favicon/ms-icon-310x310.png">
+
+    <link rel="manifest" href="assets/img/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="assets/img/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <style>
+		.categoria {
+			padding-bottom: 10px;
+		}
+
+		.categoria-titulo {
+			font-size: 18px;
+			font-weight: 600;
+			padding-left: 0px;
+			transition: padding-left 0.4s ease;
+		}
+
+			.categoria-titulo:hover {
+				cursor: pointer;
+				color: #DA823A;
+				padding-left: 10px;
+				transition: padding-left 0.4s ease;
+			}
+
+		.subcategorias {
+			padding-left: 20px;
+			max-height: 0;
+			overflow: hidden;
+			transition: max-height 0.5s ease;
+		}
+
+			.subcategorias li {
+				cursor: pointer;
+				transition: padding-left 0.3s ease; /* Nueva transición para las subcategorías */
+			}
+
+				.subcategorias li:hover {
+					padding-left: 10px; /* Desplazamiento al hacer hover */
+					color: #DA823A;
+				}
+
+			.subcategorias.mostrar {
+				max-height: 500px;
+			}
+
+		/* Nueva clase para destacar la subcategoría seleccionada */
+		.subcategoria-activa {
+			color: #DA823A;
+			font-weight: bold;
+			padding-left: 10px; /* Para que también se desplace cuando está activa */
+			transition: padding-left 0.3s ease;
+		}
+
+
+    </style>
+    <!-- Meta Pixel Code -->
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+            n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1021577462753223');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+             src="https://www.facebook.com/tr?id=1021577462753223&ev=PageView&noscript=1" />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+    @mAnalitica.AnaliticaGoogle()
+</head>
+<body>
+	<!-- Preloader Area -->
+	@navegacion.Menu()
+
+	<!-- Shop Main Area -->
+	<section id="shop_main_area">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-3">
+					<h5 style="padding-bottom: 15px;">CATEGORIAS</h5>
+					<table style="width: 100%;">
+					</table>
+					<ul id="menu">
+						@{
+							using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+							{
+								CONN.Open();
+								using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM categorias ORDER BY nombre ASC", CONN))
+								{
+									using (MySqlDataReader DATOS = CMD.ExecuteReader())
+									{
+										while (DATOS.Read())
+										{
+											<li class="categoria">
+												<span class="categoria-titulo" onclick="toggleSubmenu(this)">@DATOS["nombre"]</span>
+												<ul class="subcategorias">
+													<li onclick="changeCate('@DATOS["nombre"]', 'todo');">Todo</li>
+
+													@{
+														using (MySqlConnection CONNs = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+														{
+															CONNs.Open();
+															using (MySqlCommand CMDs = new MySqlCommand("SELECT * FROM subcategorias WHERE categoria = @varCategoria ORDER BY subcategoria ASC", CONNs))
+															{
+																CMDs.Parameters.AddWithValue("@varCategoria", DATOS["nombre"]);
+																using (MySqlDataReader DATOSs = CMDs.ExecuteReader())
+																{
+																	while (DATOSs.Read())
+																	{
+																		<li onclick="changeCate('@DATOS["nombre"]', '@DATOSs["subcategoria"]');">@DATOSs["subcategoria"]</li>
+																	}
+																}
+															}
+														}
+													}
+												</ul>
+											</li>
+										}
+									}
+								}
+							}
+						}
+					</ul>
+				</div>
+
+				<div class="col-md-9">
+					<div id="listaProductos" class="row">
+					</div>
+				</div>
+			</div>
+			<input type="hidden" id="cate" value="@cate" />
+			<input type="hidden" id="subcate" value="@subcate" />
+		</div>
+	</section>
+
+	<!-- footer Area -->
+	@navegacion.Footer()
+
+
+	<script src="~/assets/js/jquery-3.6.0.min.js"></script>
+	<script src="~/assets/js/popper.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/assets/js/owl.carousel.min.js"></script>
+	<script src="~/assets/js/meanmenu.min.js"></script>
+	<script src="~/assets/js/count.js"></script>
+	<script src="~/assets/js/nice-select.min.js"></script>
+	<script src="~/assets/js/wow.min.js"></script>
+	<script src="~/assets/js/custom.js"></script>
+	<script src="~/zcore/js/productos.js"></script>
+	<script src="~/zcore/js/buscador.js"></script>
+
+	<script>
+		new WOW().init();
+	</script>
+	<script>
+		$(document).ready(function () {
+			zCoreNextProducts();
+		});
+
+		function toggleSubmenu(categoria) {
+			// Cerrar todas las subcategorías que estén abiertas
+			var subcategoriasAbiertas = document.querySelectorAll('.subcategorias.mostrar');
+			subcategoriasAbiertas.forEach(function (sub) {
+				if (sub !== categoria.nextElementSibling) {
+					sub.classList.remove('mostrar');
+				}
+			});
+
+			// Abrir o cerrar la subcategoría seleccionada
+			var submenu = categoria.nextElementSibling;
+			submenu.classList.toggle('mostrar');
+		}
+
+		function changeCate(cate, subcate) {
+
+			zcate = parent.$('#cate').val(cate);
+			zsubcate = parent.$('#subcate').val(subcate);
+			$('.subcategorias li').removeClass('subcategoria-activa');
+			event.target.classList.add('subcategoria-activa');
+			zCoreNextProducts();
+
+			// Detectar si el usuario está en un dispositivo móvil
+			if (window.innerWidth <= 768) { 
+				$('html, body').animate({
+					scrollTop: $(document).height() * 0.4 // Cambia el 0.4 para ajustar el desplazamiento
+				}, 500);
+			}
+		}
+	</script>
+
+</body>
+
+</html>

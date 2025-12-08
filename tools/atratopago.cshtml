@@ -1,0 +1,83 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Modal Solicitud Atrato</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <!-- Referencias para plataforma de producci�n -->
+    @*<link rel="stylesheet" type="text/css" href="https://app.atratopago.com/ecommerce_plugin/highslide.css" />
+    <script type="text/javascript" src="https://app.atratopago.com/ecommerce_plugin/highslide-with-html.js"></script>
+    <script type="text/javascript" src="https://app.atratopago.com/ecommerce_plugin/highslide-config.js"></script>*@
+
+    <!-- Referencias para plataforma sandbox -->
+    <link rel="stylesheet" type="text/css" href="https://sandbox.atratopago.com/ecommerce_plugin/highslide.css" />
+    <script type="text/javascript" src="https://sandbox.atratopago.com/ecommerce_plugin/highslide-with-html.js"></script>
+    <script type="text/javascript" src="https://sandbox.atratopago.com/ecommerce_plugin/highslide-config.js"></script>
+</head>
+<body>
+
+    @*<div id="higslide-div-atrato-info"
+         data-ordernumber="QUOTE"
+         data-orderid="541"
+         data-idcommerce="313730372d33343638"
+         data-key="bWFxdWlwYW46MTcwNw=="
+         data-price="23000.99"
+         data-product="Horno gpaniz"
+         data-email="i.ysemx@gmail.com"
+         data-name="Andres nu�ez cruz"
+         data-phone="3313134494"
+         data-plataform="other"
+         data-type="pago"
+         data-version="2"
+         data-sandbox="false"
+         data-urlhost="https://app.atratopago.com">
+    </div>*@
+
+    <div id="higslide-div-atrato-info"
+         data-ordernumber="QUOTE"
+         data-orderid="543"
+         data-idcommerce="313231312d32343039"
+         data-key="bWFxdWlwYW46MTcwNw=="
+         data-price="3000.99"
+         data-product="Horno gpaniz"
+         data-email="i.yse@gmail.com"
+         data-name="Andres Nunez cruz"
+         data-phone="3313134494"
+         data-plataform="other"
+         data-type="pago"
+         data-version="2"
+         data-sandbox="true"
+         data-urlhost="https://sandbox.atratopago.com">
+    </div>
+
+    <div id="messageData"></div>
+
+    <script>
+        function showMessage(textMessage) {
+            document.getElementById("messageData").innerHTML = textMessage;
+            return false;
+        }
+        new window.Atrato_Pago_Events({
+            onSuccess: (data) => {
+                setTimeout(function () {
+                    location.href = "atratoaprobado.cshtml"; // Url de redirecci�n
+                }, 4000);
+            },
+            onPending: (data) => {
+                setTimeout(function () {
+                    location.href = "atratopendiente.cshtml"; // Url de redirecci�n
+                }, 4000);
+            },
+            onError: (error) => {
+                setTimeout(function () {
+                    location.href = "atratoerror.cshtml"; // Url de redirecci�n
+                }, 4000);
+            },
+            onRejected: (data) => {
+                setTimeout(function () {
+                    location.href = "atratorechzado.cshtml"; // Url de redirecci�n
+                }, 4000);
+            },
+        });
+    </script>
+</body>
+</html>

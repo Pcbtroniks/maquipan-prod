@@ -1,0 +1,207 @@
+﻿@mSeguridad.CookieID()
+
+<!DOCTYPE html>
+<html lang="es-mx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title -->
+    <title>Contacto</title>
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <!-- Fontawesome css -->
+    <link rel="stylesheet" href="assets/css/fontawesome.all.min.css" />
+    <!-- owl.carousel css -->
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css" />
+    <!-- owl.theme.default css -->
+    <link rel="stylesheet" href="assets/css/owl.theme.default.min.css" />
+    <!-- animate css -->
+    <link rel="stylesheet" href="assets/css/animate.min.css" />
+    <!-- meanmenu css -->
+    <link rel="stylesheet" href="assets/css/meanmenu.min.css" />
+    <!-- Style css -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- color css -->
+    <link rel="stfdsylesheet" href="assets/css/color.css" />
+    <!-- Responsive css -->
+    <link rel="stylesheet" href="assets/css/responsive.css" />
+
+    <link rel="icon" type="image/png" sizes="192x192" href="~/assets/img/favicon/ms-icon-310x310.png">
+
+
+    <link rel="manifest" href="assets/img/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="assets/img/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Meta Pixel Code -->
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+            n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1021577462753223');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1021577462753223&ev=PageView&noscript=1" />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+    @mAnalitica.AnaliticaGoogle()
+</head>
+
+<body>
+    <!-- Preloader Area -->
+    <div id="preloader">
+        <div id="status">
+            <img src="assets/img/loader.gif" alt="img">
+        </div>
+    </div>
+
+    @navegacion.Menu()
+
+    <section id="common_banner_one" style="background-image: url(/img/secciones/b_contacto.jpg)">
+        <div class="container ">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="common_banner_text">
+                        <h2>Contacto</h2>
+                        <ul>
+                            <li><a href="~/">Inicio</a></li>
+                            <li><i class="fas fa-slash"></i></li>
+                            <li class="active">Contacto</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Checkout-Area -->
+    <section id="contact_area" class="ptb-100">
+        <div class="container">
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="contact_form_one">
+                        <h3>Mantente en contacto</h3>
+                        <form action="~/zcore/tools/contactoEnviar" method="post">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <input type="text" name="nombre" class="form-control" placeholder="Nombre*" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <input type="text" name="correo" class="form-control" placeholder="Correo*" style="text-transform: lowercase" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <input type="number" name="tel" class="form-control" placeholder="Movil*">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <input type="text" name="asunto" class="form-control" placeholder="Asunto*" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+                                    <div class="form-group">
+                                        <textarea rows="7" name="mensaje" class="form-control" placeholder="Mensaje*" required></textarea>
+                                    </div>
+                                    <div class="submit_bitton_contact_one">
+                                        <button type="submit" style="background-color: #DA833A" class="theme-btn-one btn-black-overlay btn_md">Enviar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="left_side_contact">
+                        <ul>
+                            <li class="address_location">
+                                <i class="fas fa-map-marker-alt"></i>
+								<p>
+									<strong>Matriz Guadalajara Jalisco</strong> <br />
+									AV. La Paz 938. Centro. CP 44100
+								</p>
+                            </li>
+                            <li class="address_location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <p>
+                                    <strong>Sucursal CDMX</strong> <br />
+                                    Dinamarca 86 Local 1A. Colonia Juárez
+                                </p>
+                            </li>
+                            <li class="address_location">
+                                <i class="fas fa-phone-volume"></i>
+                                <div class="contact_widget">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Ventas y Cotizaciones</strong> <br />
+                                    <a href="#!">33 181-03563</a>
+                                    <a href="https://wa.me/3318103563?text=Necesito%20aseroria" target="_blank">
+                                        <img src="~/img/btncotizaciones.png" class="img-fluid" width="250" />
+                                    </a>
+                                </div>
+                            </li>
+                            <li class="address_location">
+                                <i class="fas fa-phone-volume"></i>
+                                <div class="contact_widget">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Soporte Técnico</strong> <br />
+                                    <a href="#!">33 1964-6868 </a>
+                                    <a href="https://wa.me/3319646868?text=Necesito%20aseroria%20de%20soporte" target="_blank">
+                                        <img src="~/img/btnsoporte.png" class="img-fluid" width="250" />
+                                    </a>
+                                </div>
+                            </li>
+                            <li class="address_location">
+                                <i class="fas fa-phone-volume"></i>
+                                <div class="contact_widget">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Refacciones</strong> <br />
+                                    <a href="#!">33 4070-4202 </a>
+                                    <a href="https://wa.me/3340702402?text=Necesito%20aseroria%20de%20refacciones" target="_blank">
+                                        <img src="~/img/btnrefacciones.png" class="img-fluid" width="250" />
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- footer Area -->
+    @navegacion.Footer()
+
+
+
+    <!-- Jquery -->
+    <script src="assets/js/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap js -->
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <!-- owl carousel js -->
+    <script src="assets/js/owl.carousel.min.js"></script>
+    <!-- Menu js -->
+    <script src="assets/js/meanmenu.min.js"></script>
+    <!-- img-upload js -->
+    <script src="assets/js/img-upload.js"></script>
+    <!-- Count js -->
+    <script src="assets/js/count.js"></script>
+    <!-- wow.js -->
+    <script src="assets/js/wow.min.js"></script>
+    <!-- Custom js -->
+    <script src="assets/js/custom.js"></script>
+    <script src="~/zcore/js/buscador.js"></script>
+</body>
+
+</html>

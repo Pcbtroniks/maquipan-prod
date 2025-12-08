@@ -1,0 +1,136 @@
+﻿@using System
+@using System.Configuration
+@using MySql.Data.MySqlClient
+
+<!-- CORE 4 | 8 FEB 2022 | ANDRES N C -->
+@{
+
+    string nombre = mSeguridad.sslCampo(Request.Form["nombre"].ToString());
+    string correo = mSeguridad.sslCampo(Request.Form["correo"].ToString()).ToLower();
+    string password = mSeguridad.sslCampo(Request.Form["contra"].ToString());
+    string confirmar = mSeguridad.sslCampo(Request.Form["ccontra"].ToString());
+
+    // ELIMINAMOS LOS ESPACIOS EN BLANCO
+    correo = correo.Replace(" ", "");
+    password = password.Replace(" ", "");
+
+    try
+    {
+        using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (var CMD = new MySql.Data.MySqlClient.MySqlCommand("SELECT correo FROM clientes WHERE correo = @varCorreo LIMIT 1", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varCorreo", correo);
+                var existe = CMD.ExecuteScalar();
+                if (existe != null)
+                {
+                    Session["mi_perfil_existe"] = "El correo que registras ya existe. Introduce uno diferente o inicia sesión";
+                    Session["mi_perfil_equivocado"] = "";
+                    Session["registrate"] = "";
+                    Response.Redirect("~/crear_usuario");
+                }
+                else
+                {
+                    if (password.Equals(confirmar))
+                    {
+                        Session["mi_perfil"] = "1";
+                        Session["mi_perfil_existe"] = "";
+                        Session["mi_perfil_equivocado"] = "";
+                        Session["registrate"] = "";
+                        Session["correo_usuario"] = correo;
+
+                        using (var CONNi = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+                        {
+                            CONNi.Open();
+                            using (var CMDi = new MySqlCommand("INSERT INTO clientes (nombre, paterno, rfc, correo, contra, telefono1, agente, fecha_alta, tipo, estatus, credito, credito_dias, fecha_ultima, galleta) VALUES ('" + nombre + "', '', '', '" + correo + "', '" + password + "', '', '', NOW(), 'b', 'p', '0', '0', NOW(), '"+ mClientes.ObtenerValorCookie("c") +"')", CONNi))
+                            {
+                                CMDi.ExecuteNonQuery();
+                            }
+                        }
+
+
+                        string mBody2 = "<html><body style='font-family: Arial;'>";
+                        mBody2 += "<div style='text-align: center; background-color: #f2f2f2; padding: 20px;'>";
+                        mBody2 += "<img src='https://maquipan.com.mx/assets/img/logo.png' alt='Logo' style='width: 150px; height: auto;' />";
+                        mBody2 += "</div>";
+                        mBody2 += "<div style='color: gray; font-size: 14px; margin-top: 20px;'>Gracias por crear una cuenta con nosotros, a continuación te brindamos tus credenciales para que puedas ingresar:</div>";
+                        mBody2 += "<br /><div style='color: gray; font-size: 14px;'>Nombre: " + nombre + "</div>";
+                        mBody2 += "<br /><div style='color: gray; font-size: 14px;'>Correo: " + correo + "</div>";
+                        mBody2 += "<br /><div style='color: gray; font-size: 14px;'>Contraseña: " + password + "</div>";
+                        mBody2 += "<br /><br /><hr style='border: 0; border-top: 1px solid #ddd;' />";
+                        mBody2 += "<div style='text-align: center; color: gray; font-size: 12px; margin-top: 20px;'>Maquipan - Soluciones en Equipamiento y Tecnología</div>";
+                        mBody2 += "<div style='text-align: center; color: gray; font-size: 12px;'>Matriz Guadalajara, Jalisco: AV. La Paz 938. Centro. CP 44100</div>";
+                        mBody2 += "<div style='text-align: center; color: gray; font-size: 12px;'>Sucursal CDMX: Dinamarca 86 Local 1A. Colonia Juárez</div>";
+                        mBody2 += "<div style='text-align: center; color: gray; font-size: 12px;'>Ventas y Cotizaciones: 33 181-03563</div>";
+                        mBody2 += "</body></html>";
+
+
+
+                        var message = new MimeKit.MimeMessage();
+                        message.From.Add(new MimeKit.MailboxAddress("Maquipan", "ventaenlinea@maquipan.com.mx"));
+                        message.To.Add(new MimeKit.MailboxAddress("Maquipan", correo));
+                        message.Subject = "Bienvenido a Maquipan";
+
+                        var bodyBuilder = new MimeKit.BodyBuilder
+                        {
+                            HtmlBody = mBody2,
+                            TextBody = "Bienvenido a Maquipan"
+                        };
+                        message.Body = bodyBuilder.ToMessageBody();
+
+                        using (var client = new MailKit.Net.Smtp.SmtpClient())
+                        {
+                            try
+                            {
+                                client.Connect("mail.tramitacionaduanera.com", 25, MailKit.Security.SecureSocketOptions.None);
+                                client.Authenticate("ventaenlinea@maquipan.com.mx", "uw5FejkyBsibclqgrfv;noz&mxap4t");
+                                client.Send(message);
+                            }
+                            catch (Exception ex)
+                            {
+                                Response.Write("Error: " + ex.Message); // Aquí gestionamos los errores al intentar enviar el correo
+                            }
+                            finally
+                            {
+                                client.Disconnect(true);
+                            }
+                        }
+
+                        <form id="coreIngresar" name="coreIngresar" method="post" enctype="multipart/form-data" action="~/zcore/clientes/ingresar">
+                            <input name="origen" type="hidden" value="" />
+                            <input name="correo" type="hidden" value="@correo" />
+                            <input name="contra" type="hidden" value="@password" />
+                        </form>
+                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                        <script>
+                            $(document).ready(function () {
+                                // Envía el formulario al cargar la página
+                                $("#coreIngresar").submit();
+                            });
+                        </script>
+ }
+                    else
+                    {
+                        Session["mi_perfil"] = "";
+                        Session["mi_perfil_existe"] = "Las contraseñas no coinciden.";
+                        Session["mi_perfil_equivocado"] = "";
+                        Session["registrate"] = "";
+                        Response.Redirect("~/micuenta");
+                    }
+                }
+
+            }
+        }
+    }
+    catch (MySqlException ex)
+    {
+        Response.Write("" + ex.Message);
+    }
+}
+
+@functions{
+
+
+
+}

@@ -1,0 +1,325 @@
+﻿@using System;
+@using System.Configuration;
+@using MySqlConnector;
+
+@using MercadoPago.Config;
+@using MercadoPago.Client.Preference;
+@using MercadoPago.Resource.Preference;
+@using MercadoPago.Client.Common;
+
+@mSeguridad.CookieID()
+@{
+	decimal Total = 0, grandTotal = 0;
+	decimal totalEnvio = 0;
+	string tipoEnvio = "", nombreEnvio = "", productoEnvio = "", descripcionEnvio = "";
+	string payment_id = mOrdenes.infoOrden(UrlData[0], "payment_id");
+	string payment_status = mOrdenes.infoOrden(UrlData[0], "payment_status");
+}
+<!DOCTYPE html>
+<html lang="es-mx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title -->
+    <title>Mi cuenta MAQUIPAN</title>
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="~/assets/css/bootstrap.min.css" />
+    <!-- Fontawesome css -->
+    <link rel="stylesheet" href="~/assets/css/fontawesome.all.min.css" />
+    <!-- owl.carousel css -->
+    <link rel="stylesheet" href="~/assets/css/owl.carousel.min.css" />
+    <!-- owl.theme.default css -->
+    <link rel="stylesheet" href="~/assets/css/owl.theme.default.min.css" />
+    <!-- animate css -->
+    <link rel="stylesheet" href="~/assets/css/animate.min.css" />
+    <!-- meanmenu css -->
+    <link rel="stylesheet" href="~/assets/css/meanmenu.min.css" />
+    <!-- Style css -->
+    <link rel="stylesheet" href="~/assets/css/style.css" />
+    <!-- color css -->
+    <link rel="stylesheet" href="~/assets/css/color.css" />
+    <!-- Responsive css -->
+    <link rel="stylesheet" href="~/assets/css/responsive.css" />
+    <link rel="apple-touch-icon" sizes="57x57" href="~/~/assets/img/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="~/assets/img/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="~/assets/img/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="~/assets/img/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="~/assets/img/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="~/assets/img/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="~/assets/img/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="~/assets/img/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/assets/img/favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="~/assets/img/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/assets/img/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="~/assets/img/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/assets/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="~/assets/img/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="~/assets/img/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Meta Pixel Code -->
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+            n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1021577462753223');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1021577462753223&ev=PageView&noscript=1" />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+    @mAnalitica.AnaliticaGoogle()
+</head>
+
+<body>
+
+
+	@navegacion.Menu()
+
+	<!-- Banner Area -->
+	<section id="common_banner_one" style="background-image: url(/img/secciones/b_nosotros.jpg)">
+		<div class="container ">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="common_banner_text">
+						<h2>Mi orden</h2>
+						<ul>
+							<li><a href="~/">Inicio</a></li>
+							<li><i class="fas fa-slash"></i></li>
+							<li class="active">Mi orden</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	@{
+		if (mClientes.ObtenerValorCookie("c") == mClientes.ObtenerValorCookie("c"))
+		{
+			<section class="cart-area m-5 p-5">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-8">
+							<table class="zTable">
+								@{
+
+									using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+									{
+										CONN.Open();
+										using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM artvent WHERE orden = @varIdOrden", CONN))
+										{
+											CMD.Parameters.AddWithValue("@varIdOrden", UrlData[0]);
+											using (MySqlDataReader DATOS = CMD.ExecuteReader())
+											{
+												while (DATOS.Read())
+												{
+													decimal precio = Convert.ToDecimal(DATOS["precio"].ToString());
+													//decimal preciodescuento = Convert.ToDecimal(DATOS["preciodescuento"].ToString());
+													Total = Convert.ToDecimal(DATOS["precio"].ToString()) * Convert.ToDecimal(DATOS["cantidad"].ToString());
+
+													//if (preciodescuento >= 1)
+													//{
+													//	Total = Convert.ToDecimal(DATOS["preciodescuento"].ToString()) * Convert.ToDecimal(DATOS["cantidad"].ToString());
+													//}
+													//else
+													//{
+													//	Total = Convert.ToDecimal(DATOS["precio"].ToString()) * Convert.ToDecimal(DATOS["cantidad"].ToString());
+
+													//}
+
+
+													if (DATOS["id_art"].ToString() == "envio")
+													{
+														grandTotal = grandTotal + Total;
+														totalEnvio = Total;
+														tipoEnvio = DATOS["codigo"].ToString();
+
+														if (tipoEnvio == "r")
+														{
+															nombreEnvio = DATOS["nombre"].ToString();
+															productoEnvio = "";
+															descripcionEnvio = DATOS["talla"].ToString();
+														}
+
+													}
+													else
+													{
+														grandTotal = grandTotal + Total;
+
+														<tr>
+															<td width="100">
+																<img src="~/img/productos/@DATOS["id_art"]/1.jpg" alt="img" width="100">
+															</td>
+															<td>
+																<strong class="zfs18">@mSeguridad.sslNombreDecodificar(DATOS["nombre"].ToString())</strong> <br />
+																<small>@DATOS["talla"] @DATOS["color"]</small><br />
+																<strong class="zfs18 zoPrecioProducto">Cant.: @Convert.ToDecimal(DATOS["cantidad"].ToString()).ToString("N0")  | $@Convert.ToDecimal(DATOS["precio"].ToString()).ToString("N2")</strong>
+
+																@*@if (preciodescuento >= 1)
+																{
+																	<strong class="zfs18 zoPrecioProducto">$@Convert.ToDecimal(DATOS["preciodescuento"].ToString()).ToString("N2")</strong><div class="zoPrecioProductoDescuento">$@Convert.ToDecimal(DATOS["precio"].ToString()).ToString("N2")</div>
+																}
+																else
+																{
+																	<strong class="zfs18 zoPrecioProducto">Cant.: @Convert.ToDecimal(DATOS["cantidad"].ToString()).ToString("N0")  | $@Convert.ToDecimal(DATOS["precio"].ToString()).ToString("N2")</strong>
+																}*@
+															</td>
+														</tr>
+														<tr>
+															<td colspan="2"><hr /></td>
+														</tr>
+
+													}
+
+												}
+											}
+										}
+									}
+								}
+							</table>
+						</div>
+
+						<div class="col-md-4">
+							<div style="border: 1px solid #D5D9D9; padding: 10px; background-color: #bebebe">
+								<table class="zTable">
+									<tr style="font-size: 26px; font-weight: 600; line-height: 18px;">
+										<td>
+											Orden No. @UrlData[0] <br />
+											<small style="font-size: 14px; line-height: 10px;">@mOrdenes.infoOrden(UrlData[0], "fecha")</small>
+										</td>
+									</tr>
+								</table>
+							</div>
+
+							<div style="border: 1px solid #D5D9D9; padding: 0px; background-color: #bebebe">
+								<table class="zTable">
+
+									@if (payment_status == "approved")
+									{
+										<tr style="font-size: 24px;">
+											<td style="background-color: forestgreen; color: white; text-align: center; font-weight: 600; padding: 5px 0px;">
+												APROBADA
+											</td>
+										</tr>
+										<tr>
+											<td style="padding: 5px 15px;">
+												No. Aprobación: <strong>@payment_id</strong>
+											</td>
+										</tr>
+									}
+								</table>
+							</div>
+
+							<div style="border: 1px solid #D5D9D9; padding: 10px; background-color: #bebebe">
+								<table>
+									<tr>
+										@if (tipoEnvio == "r")
+										{
+											<td id="zIdMetodoEntregaIcono" width="50"> <img src="~/img/location.png" /> </td>
+											<td id="zIdMetodoEntrega" style="padding-left: 15px;">Recolección</td>
+										}
+										else
+										{
+											<td id="zIdMetodoEntregaIcono" width="50"> <img src="~/img/enviar.png" /> </td>
+											<td id="zIdMetodoEntrega" style="padding-left: 15px;">Envio</td>
+										}
+									</tr>
+								</table>
+							</div>
+							@if (tipoEnvio == "e")
+							{
+								<div id="zIdInfoUbicacion" style="border: 1px solid #D5D9D9; padding: 10px; background-color: gray">
+									<table class="zTable zTextright">
+										<tr>
+											<td colspan="2" class="zTextleft"><strong id="zIdInfoUbicacion1">_infoNombre</strong></td>
+										</tr>
+										<tr>
+											<td id="zIdInfoUbicacion2" colspan="2" class="zTextleft">_infoUbicacion</td>
+										</tr>
+									</table>
+								</div>
+							}
+							<!--<div id="zIdInfoEnvio" style="border: 1px solid #D5D9D9; padding: 10px;background-color: gray">
+								<table class="zTable zTextright">
+									<tr>
+										<td colspan="2" class="zTextleft"><strong id="zIdInfoEnvioCarrier">@nombreEnvio</strong><br />-->@*@mEnvios.getInfoEnvios("descripcion", descripcionEnvio)*@ <!--</td>
+									</tr>
+									<tr>
+										<td id="zIdInfoEnvioProduct" class="zTextleft">@productoEnvio</td>
+										<td id="zIdInfoEnvioPrice" class="zTextright">$@totalEnvio</td>
+									</tr>
+									<tr>
+										<td colspan="2" class="zTextleft">
+											<a id="zBCambiarEnvio" href="#" class="zbootstrap-btn" style="width: 95%; margin: 0px; display: none;">cambiar paqueteria</a>
+										</td>
+									</tr>
+								</table>
+							</div>-->
+							<div style="border: 1px solid #D5D9D9; border-radius: 0px 0px 15px 15px; padding: 10px; background-color: #bebebe ">
+								<table class="zTable zTextright">
+									<tr>
+										<td width="90">Sub total:</td>
+										<td id="zoSubTotal">$@grandTotal.ToString()</td>
+									</tr>
+									@*<tr>
+										<td>Descuento:</td>
+										<td id="zoDescuento">$0</td>
+									</tr>*@
+									<tr>
+										<td>Envio:</td>
+										<td id="zoEnvio">$@totalEnvio.ToString()</td>
+									</tr>
+									<tr class="zTextTotal">
+										<td>Total:</td>
+										<td id="zoTotal">$@grandTotal.ToString()</td>
+									</tr>
+								</table>
+							</div>
+
+							<div class="col-12" style="padding-top: 25px;">
+								<div id="wallet_container"></div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</section>
+
+		}
+		else
+		{
+			Response.Redirect("~/login");
+		}
+	}
+
+
+
+
+
+	<!-- footer Area -->
+	@navegacion.Footer()
+
+	<script src="~/~/assets/js/jquery-3.6.0.min.js"></script>
+	<script src="~/~/assets/js/popper.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/~/assets/js/owl.carousel.min.js"></script>
+	<script src="~/~/assets/js/meanmenu.min.js"></script>
+	<script src="~/~/assets/js/count.js"></script>
+	<script src="~/~/assets/js/timer.js"></script>
+	<script src="~/~/assets/js/nice-select.min.js"></script>
+	<script src="~/~/assets/js/wow.min.js"></script>
+	<script src="~/~/assets/js/custom.js"></script>
+	<script src="~/zcore/js/buscador.js"></script>
+</body>
+</html>

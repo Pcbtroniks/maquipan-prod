@@ -1,0 +1,96 @@
+﻿@using System;
+@using System.IO;
+@using System.Configuration;
+@using MySql.Data.MySqlClient;
+@using MimeKit;
+@using MailKit.Net.Smtp;
+
+@functions{
+
+    public static void NotificacionCliente(string id)
+    {
+        // -------------------------------------------------------------- PLANTILLA DE COMPRA
+        string pathVirtual = HttpContext.Current.Server.MapPath("~/zcore/correo/orden.html");
+        StreamReader htmlBoletin = new StreamReader(pathVirtual);
+        string plantillaSolicitudAsistencia = htmlBoletin.ReadToEnd();
+        htmlBoletin.Close();
+        htmlBoletin.Dispose();
+
+        // -------------------------------------------------------------- HACEMOS EL ENVIO POR MAILKIT
+        string correoCuerpo = plantillaSolicitudAsistencia;
+        string stsubject = "Gracias por tu compra!! Orden No. " + id;
+        string correo = "";
+
+        // -------------------------------------------------------------- VERIFICAMOS LOS DATOS DE LA ORDEN
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM ordenes WHERE id = @id LIMIT 1", CONN))
+            {
+                CMD.Parameters.AddWithValue("@id", id);
+                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                {
+                    while (DATOS.Read())
+                    {
+                        correo = mClientes.getInfoClientesbyId(DATOS["id_cliente"].ToString(), "correo");
+                        correoCuerpo = correoCuerpo.Replace("[ORDEN]", id);
+                        correoCuerpo = correoCuerpo.Replace("[idpago]", DATOS["payment_id"].ToString());
+                        //-------- DATOS DEL ENVIO
+                        correoCuerpo = correoCuerpo.Replace("[NOMBREENVIO]", DATOS["e_para"].ToString());
+                        correoCuerpo = correoCuerpo.Replace("[DIRECCIONENVIO]", DATOS["e_calle"].ToString() + " " + DATOS["e_exterior"].ToString() + " " + DATOS["e_interior"].ToString() + ", Colonia " + DATOS["e_colonia"].ToString() + ", " + DATOS["e_ciudad"].ToString() + " " + DATOS["e_estado"].ToString() + ", C.P.: " + DATOS["e_codigopostal"].ToString());
+                    }
+                }
+            }
+        }
+
+        // -------------------------------------------------------------- VERIFICAMOS LOS ARTICULOS DE LA ORDEN
+        string articulos = "";
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM artvent WHERE orden = @varOrden", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varOrden", id);
+                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                {
+                    while (DATOS.Read())
+                    {
+                        articulos += "<tr><td><div class='nombrearticulo'>" + DATOS["nombre"] + "</div><div class='detallesarticulo'>Cant. " + Convert.ToDecimal(DATOS["cantidad"]).ToString("N0") + " | $" + Convert.ToDecimal(DATOS["precio"]).ToString("N2") + "</div></td></tr>";
+                    }
+                }
+            }
+        }
+        correoCuerpo = correoCuerpo.Replace("[ORDEN]", id);
+
+        // Configurar el servidor SMTP con MailKit
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("Maquipan", "ventaenlinea@maquipan.com.mx"));
+        message.To.Add(new MailboxAddress("", correo));
+        message.Subject = stsubject;
+        message.Body = new TextPart("html")
+        {
+            Text = correoCuerpo
+        };
+        message.Bcc.Add(new MailboxAddress("Maquipan", "ventaenlinea@maquipan.com.mx"));
+        //message.Cc.Add(new MailboxAddress("", ccCorreo));
+		System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+        try
+        {
+            using (var client = new SmtpClient())
+            {
+				client.Connect("smtp.ionos.mx", 465, true);
+				client.Authenticate("ventaenlinea@maquipan.com.mx", "6N*jMwZbf4hzWU");
+                //client.Connect("w3299.use1.stableserver.net", 465, true); // Puerto sin SSL
+                //client.Authenticate("ventaenlinea@maquipan.com.mx", "uw5FejkyBsibclqgrfv;noz&mxap4t");
+                client.Send(message);
+                client.Disconnect(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Response.Write(ex.Message);
+        }
+    }
+
+}
+

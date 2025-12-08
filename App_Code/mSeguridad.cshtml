@@ -1,0 +1,407 @@
+﻿@using System
+@using System.Configuration
+@using System.Globalization
+@using MySqlConnector
+
+
+@helper CookieID()
+{
+	// CREAMOS LA COOKIE PARA LA SESSION
+	HttpCookie cookieSession = Request.Cookies.Get(mCore.mDominio);
+	try
+	{
+		if (cookieSession != null)
+		{
+			// AQUI EXISTE LA GALLETA
+		}
+		else
+		{
+			cookieSession = new HttpCookie(mCore.mDominio);
+			cookieSession.Values["d1"] = "0";
+			cookieSession.Values["z1"] = "0";
+			cookieSession.Values["t0"] = "b";
+			cookieSession.Values["c"] = DateTime.Now.ToString().GetHashCode().ToString("x");
+			cookieSession.Expires = DateTime.Now.AddDays(30);
+			Response.Cookies.Add(cookieSession);
+		}
+	}
+	catch (Exception ex)
+	{
+
+	}
+
+}
+
+@functions{
+
+	public static string sslCampo(string campo)
+	{
+		campo = campo.TrimStart();
+		campo = campo.TrimEnd();
+
+		campo = campo.Replace("drop", "");
+		campo = campo.Replace("truncate", "");
+		campo = campo.Replace("update", "");
+		campo = campo.Replace("delete", "");
+		campo = campo.Replace("insert", "");
+		campo = campo.Replace("select", "");
+		campo = campo.Replace("from", "");
+
+		campo = campo.Replace("INSERT", "");
+		campo = campo.Replace("DROP", "");
+		campo = campo.Replace("TRUNCATE", "");
+		campo = campo.Replace("UPDATE", "");
+		campo = campo.Replace("DELETE", "");
+		campo = campo.Replace("SELECT", "");
+		campo = campo.Replace("FROM", "");
+
+		return campo;
+	}
+
+	public static string sslNombreCodificar(string campo)
+	{
+
+		campo = campo.Replace("!", "&#33");
+		campo = campo.Replace("«", "&#34");
+		campo = campo.Replace("$", "&#36");
+		campo = campo.Replace("%", "&#37");
+		campo = campo.Replace("'", "&#39");
+		campo = campo.Replace("(", "&#40");
+		campo = campo.Replace(")", "&#41");
+		campo = campo.Replace("*", "&#42");
+		campo = campo.Replace("+", "&#43");
+		campo = campo.Replace(",", "&#44");
+		campo = campo.Replace("–", "&#45");
+		campo = campo.Replace(".", "&#46");
+		campo = campo.Replace("/", "&#47");
+		campo = campo.Replace(":", "&#58");
+		campo = campo.Replace(";", "&#59");
+		campo = campo.Replace("<", "&#60");
+		campo = campo.Replace("=", "&#61");
+		campo = campo.Replace(">", "&#62");
+		campo = campo.Replace("?", "&#63");
+		campo = campo.Replace("@", "&#64");
+		campo = campo.Replace("^", "&#94");
+		campo = campo.Replace("_", "&#95");
+		campo = campo.Replace("_", "&#96");
+
+		campo = campo.Replace("{", "&#123");
+		campo = campo.Replace("|", "&#124");
+		campo = campo.Replace("}", "&#125");
+		campo = campo.Replace("~", "&#126");
+		campo = campo.Replace("Ç", "&#128");
+		campo = campo.Replace("ü", "&#129");
+
+		campo = campo.Replace("é", "&#130");
+		campo = campo.Replace("â", "&#131");
+		campo = campo.Replace("ä", "&#132");
+		campo = campo.Replace("à", "&#133");
+		campo = campo.Replace("å", "&#134");
+		campo = campo.Replace("ç", "&#135");
+		campo = campo.Replace("ê", "&#136");
+		campo = campo.Replace("ë", "&#137");
+		campo = campo.Replace("è", "&#138");
+		campo = campo.Replace("ï", "&#139");
+
+		campo = campo.Replace("ì", "&#140");
+		campo = campo.Replace("ì", "&#141");
+		campo = campo.Replace("Ä", "&#142");
+		campo = campo.Replace("Å", "&#143");
+		campo = campo.Replace("É", "&#144");
+		campo = campo.Replace("æ", "&#145");
+		campo = campo.Replace("Æ", "&#146");
+		campo = campo.Replace("ô", "&#147");
+		campo = campo.Replace("ö", "&#148");
+		campo = campo.Replace("ò", "&#149");
+
+		campo = campo.Replace("û", "&#150");
+		campo = campo.Replace("ù", "&#151");
+		campo = campo.Replace("ÿ", "&#152");
+		campo = campo.Replace("Ö", "&#153");
+		campo = campo.Replace("Ü", "&#154");
+		campo = campo.Replace("ø", "&#155");
+		campo = campo.Replace("£", "&#156");
+		campo = campo.Replace("Ø", "&#157");
+		campo = campo.Replace("×", "&#158");
+		campo = campo.Replace("ƒ", "&#159");
+
+		campo = campo.Replace("á", "&#160");
+		campo = campo.Replace("í", "&#161");
+		campo = campo.Replace("ó", "&#162");
+		campo = campo.Replace("ú", "&#163");
+		campo = campo.Replace("ñ", "&#164");
+		campo = campo.Replace("Ñ", "&#165");
+		campo = campo.Replace("ª", "&#166");
+		campo = campo.Replace("º", "&#167");
+		campo = campo.Replace("¿", "&#168");
+		campo = campo.Replace("®", "&#169");
+
+		campo = campo.Replace("¬", "&#170");
+		campo = campo.Replace("½", "&#171");
+		campo = campo.Replace("¼", "&#172");
+		campo = campo.Replace("¡", "&#173");
+		campo = campo.Replace("«", "&#174");
+		campo = campo.Replace("»", "&#175");
+		campo = campo.Replace("░", "&#176");
+		campo = campo.Replace("▒", "&#177");
+		campo = campo.Replace("▓", "&#178");
+		campo = campo.Replace("│", "&#179");
+
+		campo = campo.Replace("┤", "&#180");
+		campo = campo.Replace("Á", "&#181");
+		campo = campo.Replace("Â", "&#182");
+		campo = campo.Replace("À", "&#183");
+		campo = campo.Replace("©", "&#184");
+		campo = campo.Replace("╣", "&#185");
+		campo = campo.Replace("║", "&#186");
+		campo = campo.Replace("╗", "&#187");
+		campo = campo.Replace("╝", "&#188");
+		campo = campo.Replace("¢", "&#189");
+
+		campo = campo.Replace("¥", "&#190");
+		campo = campo.Replace("┐", "&#191");
+		campo = campo.Replace("└", "&#192");
+		campo = campo.Replace("┴", "&#193");
+		campo = campo.Replace("┬", "&#194");
+		campo = campo.Replace("├", "&#195");
+		campo = campo.Replace("─", "&#196");
+		campo = campo.Replace("┼", "&#197");
+		campo = campo.Replace("ã", "&#198");
+		campo = campo.Replace("Ã", "&#199");
+
+		campo = campo.Replace("╚", "&#200");
+		campo = campo.Replace("╔", "&#201");
+		campo = campo.Replace("╩", "&#202");
+		campo = campo.Replace("╦", "&#203");
+		campo = campo.Replace("╠", "&#204");
+		campo = campo.Replace("═", "&#205");
+		campo = campo.Replace("╬", "&#206");
+		campo = campo.Replace("¤", "&#207");
+		campo = campo.Replace("ð", "&#208");
+		campo = campo.Replace("Ð", "&#209");
+
+		campo = campo.Replace("Ê", "&#210");
+		campo = campo.Replace("Ë", "&#211");
+		campo = campo.Replace("È", "&#212");
+		campo = campo.Replace("ı", "&#213");
+		campo = campo.Replace("Í", "&#214");
+		campo = campo.Replace("Î", "&#215");
+		campo = campo.Replace("Ï", "&#216");
+		campo = campo.Replace("┘", "&#217");
+		campo = campo.Replace("┌", "&#218");
+		campo = campo.Replace("█", "&#219");
+
+		campo = campo.Replace("▄", "&#220");
+		campo = campo.Replace("¦", "&#221");
+		campo = campo.Replace("Ì", "&#222");
+		campo = campo.Replace("▀", "&#223");
+		campo = campo.Replace("Ó", "&#224");
+		campo = campo.Replace("ß", "&#225");
+		campo = campo.Replace("Ô", "&#226");
+		campo = campo.Replace("Ò", "&#227");
+		campo = campo.Replace("õ", "&#228");
+		campo = campo.Replace("Õ", "&#229");
+
+		campo = campo.Replace("µ", "&#230");
+		campo = campo.Replace("þ", "&#231");
+		campo = campo.Replace("Þ", "&#232");
+		campo = campo.Replace("Ú", "&#233");
+		campo = campo.Replace("Û", "&#234");
+		campo = campo.Replace("Ù", "&#235");
+		campo = campo.Replace("ý", "&#236");
+		campo = campo.Replace("Ý", "&#237");
+		campo = campo.Replace("¯", "&#238");
+		campo = campo.Replace("´", "&#239");
+
+		campo = campo.Replace("≡", "&#240");
+		campo = campo.Replace("±", "&#241");
+		campo = campo.Replace("‗", "&#242");
+		campo = campo.Replace("¾", "&#243");
+		campo = campo.Replace("¶", "&#244");
+		campo = campo.Replace("§", "&#245");
+		campo = campo.Replace("÷", "&#246");
+		campo = campo.Replace("¸", "&#247");
+		campo = campo.Replace("°", "&#248");
+		campo = campo.Replace("¨", "&#249");
+
+		campo = campo.Replace("·", "&#250");
+		campo = campo.Replace("¹", "&#251");
+		campo = campo.Replace("³", "&#252");
+		campo = campo.Replace("²", "&#253");
+		campo = campo.Replace("■", "&#254");
+
+		return campo;
+	}
+
+	public static string sslNombreDecodificar(string campo)
+	{
+
+		campo = campo.Replace("&#33", "!");
+		campo = campo.Replace("&#34", "«");
+		campo = campo.Replace("&#36", "$");
+		campo = campo.Replace("&#37", "%");
+		campo = campo.Replace("&#39", "'");
+		campo = campo.Replace("&#40", "(");
+		campo = campo.Replace("&#41", ")");
+		campo = campo.Replace("&#42", "*");
+		campo = campo.Replace("&#43", "+");
+		campo = campo.Replace("&#44", ",");
+		campo = campo.Replace("&#45", "–");
+		campo = campo.Replace("&#46", ".");
+		campo = campo.Replace("&#47", "/");
+		campo = campo.Replace("&#58", ":");
+		campo = campo.Replace("&#59", ";");
+		campo = campo.Replace("&#60", "<");
+		campo = campo.Replace("&#61", "=");
+		campo = campo.Replace("&#62", ">");
+		campo = campo.Replace("&#63", "?");
+		campo = campo.Replace("&#64", "@");
+		campo = campo.Replace("&#94", "^");
+		campo = campo.Replace("&#95", "_");
+		campo = campo.Replace("&#96", "`");
+
+		campo = campo.Replace("&#123", "{");
+		campo = campo.Replace("&#124", "|");
+		campo = campo.Replace("&#125", "}");
+		campo = campo.Replace("&#126", "~");
+		campo = campo.Replace("&#128", "Ç");
+		campo = campo.Replace("&#129", "ü");
+
+		campo = campo.Replace("&#130", "é");
+		campo = campo.Replace("&#131", "â");
+		campo = campo.Replace("&#132", "ä");
+		campo = campo.Replace("&#133", "à");
+		campo = campo.Replace("&#134", "å");
+		campo = campo.Replace("&#135", "ç");
+		campo = campo.Replace("&#136", "ê");
+		campo = campo.Replace("&#137", "ë");
+		campo = campo.Replace("&#138", "è");
+		campo = campo.Replace("&#139", "ï");
+
+		campo = campo.Replace("&#140", "ì");
+		campo = campo.Replace("&#141", "ì");
+		campo = campo.Replace("&#142", "Ä");
+		campo = campo.Replace("&#143", "Å");
+		campo = campo.Replace("&#144", "É");
+		campo = campo.Replace("&#145", "æ");
+		campo = campo.Replace("&#146", "Æ");
+		campo = campo.Replace("&#147", "ô");
+		campo = campo.Replace("&#148", "ö");
+		campo = campo.Replace("&#149", "ò");
+
+		campo = campo.Replace("&#150", "û");
+		campo = campo.Replace("&#151", "ù");
+		campo = campo.Replace("&#152", "ÿ");
+		campo = campo.Replace("&#153", "Ö");
+		campo = campo.Replace("&#154", "Ü");
+		campo = campo.Replace("&#155", "ø");
+		campo = campo.Replace("&#156", "£");
+		campo = campo.Replace("&#157", "Ø");
+		campo = campo.Replace("&#158", "×");
+		campo = campo.Replace("&#159", "ƒ");
+
+		campo = campo.Replace("&#160", "á");
+		campo = campo.Replace("&#161", "í");
+		campo = campo.Replace("&#162", "ó");
+		campo = campo.Replace("&#163", "ú");
+		campo = campo.Replace("&#164", "ñ");
+		campo = campo.Replace("&#165", "Ñ");
+		campo = campo.Replace("&#166", "ª");
+		campo = campo.Replace("&#167", "º");
+		campo = campo.Replace("&#168", "¿");
+		campo = campo.Replace("&#169", "®");
+		campo = campo.Replace("&#170", "¬");
+		campo = campo.Replace("&#171", "½");
+		campo = campo.Replace("&#172", "¼");
+		campo = campo.Replace("&#173", "¡");
+		campo = campo.Replace("&#174", "«");
+		campo = campo.Replace("&#175", "»");
+		campo = campo.Replace("&#176", "░");
+		campo = campo.Replace("&#177", "▒");
+		campo = campo.Replace("&#178", "▓");
+		campo = campo.Replace("&#179", "│");
+
+		campo = campo.Replace("&#180", "┤");
+		campo = campo.Replace("&#181", "Á");
+		campo = campo.Replace("&#182", "Â");
+		campo = campo.Replace("&#183", "À");
+		campo = campo.Replace("&#184", "©");
+		campo = campo.Replace("&#185", "╣");
+		campo = campo.Replace("&#186", "║");
+		campo = campo.Replace("&#187", "╗");
+		campo = campo.Replace("&#188", "╝");
+		campo = campo.Replace("&#189", "¢");
+		campo = campo.Replace("&#190", "¥");
+		campo = campo.Replace("&#191", "┐");
+		campo = campo.Replace("&#192", "└");
+		campo = campo.Replace("&#193", "┴");
+		campo = campo.Replace("&#194", "┬");
+		campo = campo.Replace("&#195", "├");
+		campo = campo.Replace("&#196", "─");
+		campo = campo.Replace("&#197", "┼");
+		campo = campo.Replace("&#198", "ã");
+		campo = campo.Replace("&#199", "Ã");
+
+		campo = campo.Replace("&#200", "╚");
+		campo = campo.Replace("&#201", "╔");
+		campo = campo.Replace("&#202", "╩");
+		campo = campo.Replace("&#203", "╦");
+		campo = campo.Replace("&#204", "╠");
+		campo = campo.Replace("&#205", "═");
+		campo = campo.Replace("&#206", "╬");
+		campo = campo.Replace("&#207", "¤");
+		campo = campo.Replace("&#208", "ð");
+		campo = campo.Replace("&#209", "Ð");
+		campo = campo.Replace("&#210", "Ê");
+		campo = campo.Replace("&#211", "Ë");
+		campo = campo.Replace("&#212", "È");
+		campo = campo.Replace("&#213", "ı");
+		campo = campo.Replace("&#214", "Í");
+		campo = campo.Replace("&#215", "Î");
+		campo = campo.Replace("&#216", "Ï");
+		campo = campo.Replace("&#217", "┘");
+		campo = campo.Replace("&#218", "┌");
+		campo = campo.Replace("&#219", "█");
+
+		campo = campo.Replace("&#220", "▄");
+		campo = campo.Replace("&#221", "¦");
+		campo = campo.Replace("&#222", "Ì");
+		campo = campo.Replace("&#223", "▀");
+		campo = campo.Replace("&#224", "Ó");
+		campo = campo.Replace("&#225", "ß");
+		campo = campo.Replace("&#226", "Ô");
+		campo = campo.Replace("&#227", "Ò");
+		campo = campo.Replace("&#228", "õ");
+		campo = campo.Replace("&#229", "Õ");
+		campo = campo.Replace("&#230", "µ");
+		campo = campo.Replace("&#231", "þ");
+		campo = campo.Replace("&#232", "Þ");
+		campo = campo.Replace("&#233", "Ú");
+		campo = campo.Replace("&#234", "Û");
+		campo = campo.Replace("&#235", "Ù");
+		campo = campo.Replace("&#236", "ý");
+		campo = campo.Replace("&#237", "Ý");
+		campo = campo.Replace("&#238", "¯");
+		campo = campo.Replace("&#239", "´");
+
+		campo = campo.Replace("&#240", "≡");
+		campo = campo.Replace("&#241", "±");
+		campo = campo.Replace("&#242", "‗");
+		campo = campo.Replace("&#243", "¾");
+		campo = campo.Replace("&#244", "¶");
+		campo = campo.Replace("&#245", "§");
+		campo = campo.Replace("&#246", "÷");
+		campo = campo.Replace("&#247", "¸");
+		campo = campo.Replace("&#248", "°");
+		campo = campo.Replace("&#249", "¨");
+
+		campo = campo.Replace("&#250", "·");
+		campo = campo.Replace("&#251", "¹");
+		campo = campo.Replace("&#252", "³");
+		campo = campo.Replace("&#253", "²");
+		campo = campo.Replace("&#254", "■");
+
+		return campo;
+	}
+
+}

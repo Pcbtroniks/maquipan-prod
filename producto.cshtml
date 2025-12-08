@@ -1,0 +1,374 @@
+﻿@using System
+@using System.Configuration
+@using MySqlConnector
+@mSeguridad.CookieID()
+
+@{
+
+    string basePath = @"C:\inetpub\vhosts\boring-williams.209-46-122-218.plesk.page\httpdocs\img\productos";
+
+    using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+    {
+        CONN.Open();
+        using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM catart WHERE urlf = @Vurlf LIMIT 1", CONN))
+        {
+            CMD.Parameters.AddWithValue("@Vurlf", UrlData[0]);
+            MySqlDataReader DATOS = CMD.ExecuteReader();
+            while (DATOS.Read())
+            {
+                <!DOCTYPE html>
+                <html lang="es-mx">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+                    <!-- Title -->
+                    <title>@Html.Raw(DATOS["nombre"].ToString())</title>
+
+                    <meta name="description" content="@Html.Raw(DATOS["descripcion"].ToString())">
+                    <link rel="canonical" href="https://maquipan.com.mx/producto/@DATOS["urlf"]" />
+
+                    <meta property="og:title" content="@Html.Raw(DATOS["nombre"].ToString())" />
+                    <meta property="og:description" content="@Html.Raw(DATOS["descripcion"].ToString())" />
+                    <meta property="og:image" content="https://maquipan.com.mx/img/productos/@DATOS["id"]/1.jpg" />
+                    <meta property="og:url" content="https://maquipan.com.mx/producto/@DATOS["urlf"]" />
+
+                    <!-- Bootstrap css -->
+                    <link rel="stylesheet" href="~/assets/css/bootstrap.min.css" />
+                    <link rel="stylesheet" href="~/assets/css/fontawesome.all.min.css" />
+                    <link rel="stylesheet" href="~/assets/css/owl.carousel.min.css" />
+                    <link rel="stylesheet" href="~/assets/css/owl.theme.default.min.css" />
+                    <link rel="stylesheet" href="~/assets/css/jquery.lineProgressbar.css" />
+                    <link rel="stylesheet" href="~/assets/css/animate.min.css" />
+                    <link rel="stylesheet" href="~/assets/css/meanmenu.min.css" />
+                    <link rel="stylesheet" href="~/assets/css/style.css" />
+                    <link rel="stylesheet" href="~/assets/css/color.css" />
+                    <link rel="stylesheet" href="~/assets/css/responsive.css" />
+                    <link rel="icon" type="image/png" sizes="192x192" href="~/assets/img/favicon/ms-icon-310x310.png">
+
+                    <meta name="msapplication-TileColor" content="#ffffff">
+                    <meta name="msapplication-TileImage" content="assets/img/favicon/ms-icon-144x144.png">
+                    <meta name="theme-color" content="#ffffff">
+
+                    @*<link rel="stylesheet" type="text/css" href="https://app.atratopago.com/ecommerce_plugin/highslide.css" />
+                        <script type="text/javascript" src="https://app.atratopago.com/ecommerce_plugin/highslide-with-html.js"></script>
+                        <script type="text/javascript" src="https://app.atratopago.com/ecommerce_plugin/highslide-config.js"></script>*@
+
+                    <style>
+                        .imgMaqui {
+                            width: 18% !important;
+                            z-index: 90;
+                            cursor: pointer;
+                        }
+                    </style>
+
+                    <!-- Meta Pixel Code -->
+                    <script>
+                        !function (f, b, e, v, n, t, s) {
+                            if (f.fbq) return; n = f.fbq = function () {
+                                n.callMethod ?
+                                n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                            };
+                            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+                            n.queue = []; t = b.createElement(e); t.async = !0;
+                            t.src = v; s = b.getElementsByTagName(e)[0];
+                            s.parentNode.insertBefore(t, s)
+                        }(window, document, 'script',
+                            'https://connect.facebook.net/en_US/fbevents.js');
+                        fbq('init', '1021577462753223');
+                        fbq('track', 'PageView');
+                        // Evento para rastrear la visualización de un producto
+                        fbq('track', 'ViewContent', {
+                            content_name: '@DATOS["nombre"]', // Nombre del producto
+                            content_category: '@DATOS["cate"]', // Categoría del producto
+                            value: '@DATOS["precio"]', // Precio del producto
+                            currency: 'MXN' // Moneda del precio
+                        });
+                        // Evento personalizado para rastrear la categoría visitada
+                        fbq('trackCustom', 'CategoriaVisitada', {
+                            category_name: '@DATOS["cate"]', // Nombre de la categoría
+                        });
+                    </script>
+                    <noscript>
+                        <img height="1" width="1" style="display:none"
+                             src="https://www.facebook.com/tr?id=1021577462753223&ev=PageView&noscript=1" />
+                    </noscript>
+                    <!-- End Meta Pixel Code -->
+                    @mAnalitica.AnaliticaGoogle()
+                </head>
+                <body>
+                    @navegacion.Menu()
+
+
+                    <!-- Product Single Area -->
+                    <section id="product_single_three" style="padding: 5px 0px;">
+
+                        <div class="container">
+                            <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="~/">Inicio</a></li>
+                                    <li class="breadcrumb-item" aria-current="page"><a href="~/productos/@DATOS["cate"]/todo">@DATOS["cate"]</a></li>
+                                    <li class="breadcrumb-item" aria-current="page"><a href="~/productos/@DATOS["cate"]/@DATOS["subcate"]">@DATOS["subcate"]</a></li>
+                                </ol>
+                            </nav>
+                            <div class="row area_boxed">
+                                <div class="col-lg-6" style="z-index: 98;">
+                                    <div class="product_single_two_img slider-for">
+                                        <div id="mContenedorImages" class="product_img_two_slider">
+                                            <img id="idImgPrincipal" src="~/img/productos/@DATOS["id"]/1.jpg" alt="@DATOS["nombre"]" style="z-index: 90;" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            @{
+                                                for (int i = 1; i < 6; i++)
+                                                {
+                                                    if (System.IO.File.Exists(basePath + "/" + DATOS["id"].ToString() + "/" + i + ".jpg"))
+                                                    {
+                                                        string imgactual = i + ".jpg";
+                                                        <img src="~/img/productos/@DATOS["id"]/@imgactual" alt="@DATOS["nombre"]" class="imgMaqui thumbnail" onclick="OnClickIMagen('@i');" />
+                                                    }
+                                                }
+                                                if (DATOS["youtube"].ToString() != "")
+                                                {
+                                                    <img src="~/img/youtube.png" alt="" class="" width="76" onclick="OnClickYoutube();" style="margin: 4px;" />
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="product_details_right_one">
+                                        <div class="modal_product_content_one">
+                                            <h3>@DATOS["nombre"]</h3>
+
+                                            <small>sku: @DATOS["codigo"]</small>
+                                            <h4 style="font-size: 30px;">
+
+                                                $@Convert.ToDecimal(DATOS["precio"]).ToString("N2")
+
+                                                @if (DATOS["hot"].ToString() == "1")
+                                                {
+                                                    <del style="color:red">$@Convert.ToDecimal(DATOS["pre_promo"]).ToString("N2")</del>
+                                                }
+                                            </h4>
+
+                                            <small class="text-muted">mxn pesos mexicanos</small>
+
+                                            @if (Convert.ToDecimal(DATOS["precio"]) >= 5000)
+                                            {
+                                                <div>
+                                                    <div id="higslide-div-atrato-info"
+                                                         data-plataform="other"
+                                                         data-type="info"
+                                                         data-price="@Convert.ToDecimal(DATOS["precio"])"
+                                                         data-version="2.0"
+                                                         data-style="dark"
+                                                         data-linkcolor="black"
+                                                         data-urlhost="https://app.atratopago.com">
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <p>
+                                                @DATOS["beneficios"]
+                                            </p>
+                                            <p>
+                                                <small style="color: #DA823A;">Caracteristicas:</small><br />
+                                                @Html.Raw(DATOS["descripcion"])
+
+
+                                            </p>
+                                            <p>
+                                                @{
+                                                    string fnameImage = DATOS["id"].ToString() + @"\" + DATOS["ficha"].ToString();
+                                                    string fpathFileImage = Path.Combine(@"C:\Inetpub\vhosts\boring-williams.209-46-122-218.plesk.page\httpdocs\img\productos\", fnameImage);
+
+                                                    if (File.Exists(fpathFileImage))
+                                                    {
+                                                        <img src="~/img/icon_pdf.png" width="32" /> <a href="~/img/productos/@DATOS["id"].ToString()/@DATOS["ficha"].ToString()" target="_blank"> Ver ficha técnica</a>
+                                                    }
+                                                }
+                                                <hr />
+                                            </p>
+
+
+                                            @if (DATOS["ventaonline"].ToString() == "1")
+                                            {
+                                                <form id="fproducto" name="fproducto" method="post" enctype="multipart/form-data" action="~/zcore/carrito/agregar">
+                                                    <input name="id" type="hidden" value="@DATOS["id"]" />
+                                                    <div class="product_count_one">
+                                                        <div class="plus-minus-input">
+                                                            <div class="input-group-button">
+                                                                <button type="button" class="button" data-quantity="minus"
+                                                                        data-field="quantity">
+                                                                    <i class="fa fa-minus" aria-hidden="true"></i>
+                                                                </button>
+                                                            </div>
+                                                            <input class="form-control" type="number" name="ca" min="1" step="1" value="1" style="width: 60px; text-align: center; margin: 0px 10px;">
+                                                            <div class="input-group-button">
+                                                                <button type="button" class="button" data-quantity="plus"
+                                                                        data-field="quantity">
+                                                                    <i class="fa fa-plus" aria-hidden="true"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                                <div class="links_Product_areas area_custom_details">
+                                                    <ul>
+                                                        <li>
+                                                            <button form="fproducto" type="submit" class="theme-btn-one btn-black-overlay btn_sm">agregar a carrito</button>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <a href="https://wa.me/5215569662786?text=Necesito%20aseroria%20de%20 @DATOS["nombre"]" target="_blank">
+                                                    <img src="~/img/contacto.png" class="img-fluid" />
+                                                </a>
+                                            }
+
+
+                                            <div class="product_detail_socials d-flex align-items-center">
+                                                <table width="100%" style="margin-top: 20px;">
+                                                    <tr>
+                                                        <td><img src="~/img/fast-delivery.png" width="64" /></td>
+                                                        <td style="padding-left: 15px; line-height: 16px;">
+                                                            <strong>Envios a todo México</strong><br />
+                                                            <small style="color: dimgrey; font-size: 16px;">Después de tu compra, un asesor se pondrá en contacto para obtener detalles sobre la entrega y su costo.</small>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="64"></td>
+                                                        <td class="pt-4">
+                                                            <strong>Metodos de pago</strong><br />
+                                                            <img src="~/img/metodospago.png" class="img-fluid pt-3" />
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+
+                    <!-- Related Product -->
+                    <section id="related_product" class="pb-100">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="center_heading">
+                                        <h2>Otros productos</h2>
+                                        <p>Explora aquí más productos fascinantes</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                @using (MySqlConnection CONNp = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+                                {
+                                    CONNp.Open();
+                                    using (MySqlCommand CMDp = new MySqlCommand("SELECT id, urlf, nombre, precio FROM catart WHERE activo = '1' AND id != @id AND subcate = @categoria ORDER BY RAND() LIMIT 4;", CONNp))
+                                    {
+                                        CMDp.Parameters.AddWithValue("@id", DATOS["id"]);
+                                        CMDp.Parameters.AddWithValue("@categoria", DATOS["subcate"]);  // Aquí va tu variable de categoría
+
+                                        MySqlDataReader DATOSp = CMDp.ExecuteReader();
+                                        while (DATOSp.Read())
+                                        {
+                                            <div class="col-6 col-md-3 ">
+                                                <div class="product_wrappers_one">
+                                                    <div class="thumb">
+                                                        <a href="~/producto/@DATOSp["urlf"]" class="image">
+                                                            <img src="~/img/productos/@DATOSp["id"]/1.jpg" alt="@DATOSp["nombre"]" />
+                                                            <img class="hover-image" src="~/img/productos/@DATOSp["id"]/1.jpg" alt="@DATOSp["nombre"]" />
+                                                        </a>
+                                                        <a href="~/producto/@DATOSp["urlf"]" title="ver..." class="add-to-cart">
+                                                            ver...
+                                                        </a>
+                                                    </div>
+                                                    <div class="content">
+                                                        <h5 class="title">
+                                                            <a href="~/producto/@DATOSp["urlf"]">@DATOSp["nombre"]</a>
+                                                        </h5>
+                                                        <span class="price">
+                                                            <span class="new"><strong>$@Convert.ToDecimal(DATOSp["precio"]).ToString("N2")</strong></span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                }
+
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="mIDYoutube" tabindex="-1" aria-labelledby="mIDYoutubeLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-fullscreen">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="mIDYoutubeLabel">@DATOS["nombre"]</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.Raw(DATOS["youtube"].ToString())
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- footer Area -->
+                    @navegacion.Footer()
+
+                    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+                    <script src="~/assets/js/popper.min.js"></script>
+                    <script src="~/assets/js/bootstrap.min.js"></script>
+                    <script src="~/assets/js/owl.carousel.min.js"></script>
+                    <script src="~/assets/js/meanmenu.min.js"></script>
+                    <script src="~/assets/js/count.js"></script>
+                    <script src="~/assets/js/nice-select.min.js"></script>
+                    <script src="~/assets/js/wow.min.js"></script>
+                    <script src="~/assets/js/custom.js"></script>
+                    <script src="~/assets/js/slick.js"></script>
+                    <script src="~/zcore/js/buscador.js"></script>
+                    <script>
+                        var embedYoutube = '@Html.Raw(mSeguridad.sslNombreDecodificar(DATOS["youtube"].ToString()))';
+                        function OnClickIMagen(cId) {
+                            $('#mContenedorImages').html('');
+                            var embedImg = '<img id="idImgPrincipal" src="/img/productos/@DATOS["id"]/' + cId + '.jpg" alt="@DATOS["nombre"]" style="z-index: 90;" />';
+                            $('#mContenedorImages').append(embedImg);
+                        }
+
+						function OnClickYoutube() {
+                            $('#mContenedorImages').html('');
+                            $('#mContenedorImages').append(embedYoutube);
+                            $('#mContenedorImages iframe').attr('width', '100%');
+                            var sWith = $('#mContenedorImages iframe').width();
+                            var sHeight = (sWith * 9) / 16;
+                            $('#mContenedorImages iframe').attr('height', sHeight);
+						}
+                    </script>
+
+
+                </body>
+
+            </html>
+        }
+
+    }
+}
+
+
+
+}

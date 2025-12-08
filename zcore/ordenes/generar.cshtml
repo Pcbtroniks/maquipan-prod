@@ -1,0 +1,106 @@
+@using System
+@using System.Configuration
+@using MySql.Data.MySqlClient
+
+@{
+    try
+    {
+        if (!mOrdenes.haveOrderOpen())
+        {
+            generarOrden(mClientes.getInfoCliente("id", mClientes.ObtenerValorCookie("c")));
+            Response.Redirect("~/carrito");
+        }
+    }
+    catch (MySqlException ex)
+    {
+        Response.Write(ex.Message);
+    }
+}
+
+@functions{
+
+    private static void generarOrden(string idCliente)
+    {
+        int lastInsertedId = -1;
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("INSERT INTO ordenes (id_cliente, fecha, estatus, galleta) VALUES (@idClientes, NOW(), @varEstatus, @varGalleta); SELECT LAST_INSERT_ID();", CONN))
+            {
+                // Suponiendo que tienes parámetros @idClientes y @estatus, asegúrate de agregarlos y establecer sus valores
+                CMD.Parameters.AddWithValue("@idClientes", idCliente);
+                CMD.Parameters.AddWithValue("@varEstatus", "PEN");
+                CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+
+
+                // Ejecutar la consulta y obtener el último ID insertado
+                lastInsertedId = Convert.ToInt32(CMD.ExecuteScalar());
+
+                // Agregamos los articulos al ARTVENT del CARRITO
+                agregarArticulosToOrden(lastInsertedId.ToString());
+
+                // Eliminamos los articulos al ARTVENT del CARRITO
+                deleteItemsFromCarrito();
+            }
+        }
+    }
+
+    private static void agregarArticulosToOrden(string lastId)
+    {
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM carrito WHERE galleta = @varGalleta", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                {
+                    while (DATOS.Read())
+                    {
+                        insertarArticulo(lastId, DATOS["id_art"].ToString(), DATOS["codigo"].ToString(), DATOS["nombre"].ToString(), DATOS["precio"].ToString(), DATOS["cantidad"].ToString(), "", "", "", "");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void insertarArticulo(string orden, string idArticulo, string codigo, string nombre, string precio, string cantidad, string observacion, string talla, string color, string categoria)
+    {
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("INSERT INTO artvent (orden, id_art, codigo, nombre, precio, cantidad, observacion, talla, color, cate, galleta) VALUES (@orden, @idArticulo, @codigo, @nombre, @precio, @cantidad, @observacion, @talla, @color, @categoria, @varGalleta)", CONN))
+            {
+                CMD.Parameters.AddWithValue("@orden", orden);
+                CMD.Parameters.AddWithValue("@idArticulo", idArticulo);
+                CMD.Parameters.AddWithValue("@codigo", codigo);
+                CMD.Parameters.AddWithValue("@nombre", nombre);
+                CMD.Parameters.AddWithValue("@precio", precio);
+                CMD.Parameters.AddWithValue("@cantidad", cantidad);
+                CMD.Parameters.AddWithValue("@observacion", observacion);
+                CMD.Parameters.AddWithValue("@talla", talla);
+                CMD.Parameters.AddWithValue("@color", color);
+                CMD.Parameters.AddWithValue("@categoria", categoria);
+                CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+
+
+                CMD.ExecuteNonQuery();
+            }
+        }
+    }
+
+    private static void deleteItemsFromCarrito()
+    {
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("DELETE FROM carrito WHERE galleta = @varGalleta", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+                CMD.ExecuteNonQuery();
+            }
+        }
+
+
+    }
+}

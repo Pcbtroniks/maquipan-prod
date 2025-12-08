@@ -1,0 +1,83 @@
+@using System
+@using System.Configuration
+@using System.IO
+@using NPOI.HSSF.UserModel
+@using NPOI.SS.UserModel
+@using MySql.Data.MySqlClient
+
+
+@{
+
+    int cc = 0;
+
+    string codigo = "";
+    string marca = "";
+    string nombre = "";
+
+    // Ruta al archivo XLS
+    string filePath = @"C:\Inetpub\vhosts\boring-williams.209-46-122-218.plesk.page\httpdocs\tools\gpaniz.xls";
+
+    // Cargar el archivo XLS
+    using (FileStream file = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+    {
+        // Crear un libro de trabajo desde el archivo
+        HSSFWorkbook workbook = new HSSFWorkbook(file);
+
+        // Obtener la primera hoja del libro de trabajo
+        ISheet sheet = workbook.GetSheetAt(0);
+
+        // Iterar a trav?s de las filas de la hoja
+        for (int i = 0; i <= sheet.LastRowNum; i++)
+        {
+            cc = 0;
+            IRow row = sheet.GetRow(i);
+            if (row != null)
+            {
+                // Iterar a trav?s de las celdas de la fila
+                for (int j = 0; j < row.LastCellNum; j++)
+                {
+                    Response.Write(row.GetCell(j) + "<br>");
+
+                    if (cc == 0)
+                    {
+                        codigo = row.GetCell(j).ToString();
+                        codigo = codigo.Replace(" _", "");
+                    }
+
+                    if (cc == 1)
+                    {
+                        marca = row.GetCell(j).ToString();
+                        marca = marca.Replace(" _", "");
+                    }
+
+                    if (cc == 2)
+                    {
+                        nombre = row.GetCell(j).ToString();
+                        nombre = nombre.Replace(" _", "");
+                    }
+
+                    cc++;
+                }
+
+                agregarArticulo(codigo, marca, nombre);
+            }
+        }
+    }
+
+}
+
+@functions{
+
+
+    private static void agregarArticulo(string codigo, string marca, string nombre)
+    {
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand cmd = new MySqlCommand("INSERT INTO catart (codigo, marca, nombre) VALUES('" + codigo + "', '" + marca + "', '" + nombre + "')", CONN))
+            {
+               //  cmd.ExecuteNonQuery();
+            }
+        }
+    }
+}

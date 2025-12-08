@@ -1,0 +1,21 @@
+@using System
+@using System.Configuration
+@using MySql.Data.MySqlClient
+
+@{
+    var id = UrlData[0];
+
+    using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+    {
+        CONN.Open();
+        using (var CMD = new MySql.Data.MySqlClient.MySqlCommand("DELETE FROM fichas_ubicaciones WHERE id = @varId", CONN))
+        {
+
+            CMD.Parameters.AddWithValue("@varId", id);
+
+            CMD.ExecuteNonQuery();
+        }
+    }
+    Response.Redirect("~/micuenta");
+
+}

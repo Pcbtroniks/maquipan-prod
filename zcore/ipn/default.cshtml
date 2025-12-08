@@ -1,0 +1,142 @@
+﻿@using MercadoPago
+@using MercadoPago.Config
+@using MercadoPago.Client.Preference
+@using MercadoPago.Resource.Preference
+@using MercadoPago.Client.Common
+
+@using System;
+@using System.Configuration;
+@using System.Net;
+@using System.Net.Mail;
+@using System.Text;
+@using System.Web;
+@using MySqlConnector;
+
+@{
+	string id = Request.QueryString["id"];
+	string monto = "";
+
+	try
+	{
+		MercadoPagoConfig.AccessToken = mConfiguraciones.getConfiguraciones("mpaccesstoken");
+	}
+	catch (Exception ex) { }
+
+	try
+	{
+		ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+		// CAPTAMOS LA INFORMACIÓN DE LA IPN
+		string uri = "https://api.mercadopago.com/v1/payments/" + id;
+		HttpWebRequest req = (HttpWebRequest)WebRequest.Create(uri);
+		req.Headers.Add("Authorization: Bearer " + mConfiguraciones.getConfiguraciones("mpaccesstoken"));
+		var responseMP = req.GetResponse();
+		string webcontent;
+
+		using (var strm = new StreamReader(responseMP.GetResponseStream()))
+		{
+			webcontent = strm.ReadToEnd();
+			strm.Close();
+			strm.Dispose();
+		}
+		req.Abort();
+
+		//------------------------ ENVIAMOS EL CORREO CON LA NOTIFICAION DE CADA PETICION IPN
+		//stNotificaciones.notificacionGenerica(webcontent);
+
+		dynamic response = Json.Decode(webcontent);
+
+		string idmp = response["id"].ToString();
+		string estatus = response["status"];
+		string estatus_detail = response["status_detail"];
+		string external_reference = response["external_reference"];
+		string payment_type = response["payment_type_id"];
+		string payment_method_id = response["payment_method_id"];
+		string Fecha = Convert.ToDateTime(response["date_approved"]).ToString("yyyy-MM-dd HH:mm:ss");
+		monto = response["transaction_amount"].ToString();
+
+		//Response.Write(webcontent);
+		//Response.Write("Monto:" + monto);
+
+
+		MySql.Data.MySqlClient.MySqlConnection CONNc = new MySql.Data.MySqlClient.MySqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString);
+		CONNc.Open();
+		var sqlActualizarRecibo = "";
+
+
+		//  CONDICION SI EL PAGO ES POR OXXO,EXTRA U OTRA FORMA EN EFECTIVO
+		if (payment_type == "ticket" && estatus == "pending")
+		{
+			sqlActualizarRecibo = "UPDATE ordenes SET payment_id = '" + id + "', payment_status = '" + estatus + "', payment_status_detail = '" + estatus_detail + "', payment_type = '" + payment_type + "', external_reference = '" + external_reference + "', fecha_ventas = '" + Fecha + "', estatus_ventas = 'PEN',  estatus = 'POS', payment_method_id = '" + payment_method_id + "'  WHERE id = '" + external_reference + "' ";
+		}
+
+		// ------------------------------------------------------------------------------
+		// ------------------------------------------------------------------------------
+		//  CONDICION SI EL PAGO ES APROBADO VIA TARJETA DEBITO/CREDITO, DINERO ELECTRONICO Ó MONEDERO ELECTRONICO
+		if (estatus == "approved")
+		{
+			try
+			{
+				/* Revisamos si la notificacion ya ha sido enviada -> en caso que no, se le envia un correo con la compra efectuada */
+				using (MySqlConnection CONN = new MySqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+				{
+					CONN.Open();
+					using (MySqlCommand CMD = new MySqlCommand("SELECT fecha_notificacion FROM ordenes WHERE id = " + external_reference + ";", CONN))
+					{
+						MySqlDataReader DATOS = CMD.ExecuteReader();
+
+						while (DATOS.Read())
+						{
+							if (DATOS["fecha_notificacion"].ToString() == null || DATOS["fecha_notificacion"].ToString() == "")
+							{
+								mNotificaciones.NotificacionCliente(external_reference);
+							}
+						}
+						CMD.Connection.Close();
+					}
+					CONN.Close();
+					CONN.Dispose();
+				}
+			}
+			catch (Exception ex)
+			{
+				Response.Write("" + ex.Message);
+			}
+
+			sqlActualizarRecibo = "UPDATE ordenes SET payment_id = '" + id + "', payment_status = '" + estatus + "', payment_status_detail = '" + estatus_detail + "', payment_type = '" + payment_type + "', external_reference = '" + external_reference + "', fecha_notificacion = NOW(), fecha_ventas = '" + Fecha + "', estatus_ventas = 'POS',  estatus = 'POS', payment_method_id = '" + payment_method_id + "'  WHERE id = '" + external_reference + "' ";
+
+			try
+			{
+				using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+				{
+					CONN.Open();
+					using (var CMD = new MySqlCommand("UPDATE clientes SET estatus = 'c' WHERE correo = '" + response["payer"]["email"] + "' ", CONN))
+					{
+						CMD.ExecuteNonQuery();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+
+			}
+		}
+
+		if (estatus == "cancelled")
+		{
+			sqlActualizarRecibo = "UPDATE ordenes SET payment_id = '" + id + "', payment_status = '" + estatus + "', payment_status_detail = '" + estatus_detail + "', payment_type = '" + payment_type + "', external_reference = '" + external_reference + "', fecha_notificacion = '" + Fecha + "', fecha_ventas = '" + Fecha + "', estatus_ventas = 'NGA',  estatus = 'POS', payment_method_id = '" + payment_method_id + "'  WHERE id = '" + external_reference + "' ";
+		}
+
+		MySql.Data.MySqlClient.MySqlCommand CMDc = new MySql.Data.MySqlClient.MySqlCommand(sqlActualizarRecibo, CONNc);
+		CMDc.ExecuteNonQuery();
+		CMDc.Connection.Close();
+		CONNc.Close();
+		CONNc.Dispose();
+
+
+	}
+	catch (Exception ex)
+	{
+		Response.Write(ex.Message);
+	}
+}

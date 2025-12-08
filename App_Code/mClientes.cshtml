@@ -1,0 +1,108 @@
+@using System
+@using System.Configuration
+@using MySqlConnector
+
+@functions{
+
+
+    public static string ObtenerValorCookie(string nombreVariable)
+    {
+        string valorVariable = "";
+
+        HttpCookie cookieSession = Request.Cookies.Get(mCore.mDominio);
+        try
+        {
+            if (cookieSession != null && cookieSession.Values[nombreVariable] != null)
+            {
+                valorVariable = cookieSession.Values[nombreVariable];
+            }
+        }
+        catch (Exception ex)
+        {
+            // Manejo de excepciones si es necesario
+        }
+
+        return valorVariable;
+    }
+
+    public static void galletaUsuario(string id)
+    {
+        try
+        {
+            using (var CONNc = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+            {
+                CONNc.Open();
+                using (var CMDc = new MySqlConnector.MySqlCommand("UPDATE clientes SET galleta = '" + mClientes.ObtenerValorCookie("c") + "' WHERE id = '" + id + "'", CONNc))
+                {
+                    CMDc.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+    }
+
+    public static string getInfoCliente(string columna, string valor)
+    {
+        string respuesta = "";
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM clientes WHERE galleta = @varValor LIMIT 1; ", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varValor", valor);
+                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                {
+                    while (DATOS.Read())
+                    {
+                        respuesta = DATOS[columna].ToString();
+                    }
+                }
+            }
+        }
+        return respuesta;
+    }
+
+    public static bool haveAdress(string id)
+    {
+        bool respuesta = false;
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM fichas_ubicaciones WHERE id_cliente = @varId ", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varId", id);
+                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                {
+                    respuesta = DATOS.HasRows;
+                }
+            }
+        }
+        return respuesta;
+    }
+
+    public static string getInfoClientesbyId(string id, string columna)
+    {
+        string respuesta = "";
+        using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+            using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM clientes WHERE id = @varId ", CONN))
+            {
+                CMD.Parameters.AddWithValue("@varId", id);
+                using (MySqlDataReader DATOS = CMD.ExecuteReader())
+                {
+                    while (DATOS.Read())
+                    {
+                        respuesta = DATOS[columna].ToString();
+                    }
+                }
+            }
+        }
+        return respuesta;
+    }
+
+}

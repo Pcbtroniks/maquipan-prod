@@ -1,0 +1,105 @@
+@using System
+@using System.Configuration
+@using MySqlConnector
+
+@functions{
+
+	public static bool havePickUpSuc()
+	{
+		bool respuesta = false;
+
+		using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+		{
+			CONN.Open();
+			using (MySqlCommand CMD = new MySqlCommand("SELECT COUNT(*) FROM envios WHERE tipo = 'r' AND activo = '1' LIMIT 1 ", CONN))
+			{
+				int existe = Convert.ToInt32(CMD.ExecuteScalar());
+				if (existe >= 1) { respuesta = true; }
+			}
+		}
+		return respuesta;
+	}
+
+	public static float envioclickTotalPesoCarrito()
+	{
+		float dato = 0;
+
+		if (mOrdenes.haveOrderOpen())
+		{
+
+		}
+		else
+		{
+			using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+			{
+				CONN.Open();
+				using (var CMD = new MySqlCommand("SELECT * FROM carrito WHERE galleta = @varGalleta AND id_art != 'envio'", CONN))
+				{
+					CMD.Parameters.AddWithValue("@varGalleta", mClientes.ObtenerValorCookie("c"));
+					var DATOS = CMD.ExecuteReader();
+					while (DATOS.Read())
+					{
+						dato = dato + (float.Parse(DATOS["ecweightf"].ToString()) * float.Parse(DATOS["cantidad"].ToString()));
+					}
+				}
+			}
+		}
+
+		// DIVIDIMOS ENTRE 1000 PARA CONVERTIR LOS GRAMOS A KG
+		dato = dato / 1000;
+
+		string Dato = dato.ToString("0.000");
+		dato = float.Parse(Dato);
+		if (dato < 1) { dato = 1; }
+
+		return dato;
+	}
+
+	public static string getInfoShipping(string columna, string idOrden = "")
+	{
+		string respuesta = "";
+
+		using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+		{
+			CONN.Open();
+			using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM artvent WHERE id_art = 'envio' AND orden = @varIdOrden LIMIT 1", CONN))
+			{
+				CMD.Parameters.AddWithValue("@varIdOrden", idOrden);
+				using (MySqlDataReader DATOS = CMD.ExecuteReader())
+				{
+					while (DATOS.Read())
+					{
+						return DATOS[columna].ToString();
+					}
+				}
+			}
+		}
+
+
+		return respuesta;
+	}
+
+	public static string getInfoEnvios(string columna, string id = "")
+	{
+		string respuesta = "";
+
+		using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+		{
+			CONN.Open();
+			using (MySqlCommand CMD = new MySqlCommand("SELECT * FROM envios WHERE id = @varId", CONN))
+			{
+				CMD.Parameters.AddWithValue("@varId", id);
+				using (MySqlDataReader DATOS = CMD.ExecuteReader())
+				{
+					while (DATOS.Read())
+					{
+						return DATOS[columna].ToString();
+					}
+				}
+			}
+		}
+
+		return respuesta;
+	}
+
+}

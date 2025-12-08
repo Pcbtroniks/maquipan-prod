@@ -1,0 +1,130 @@
+﻿@mSeguridad.CookieID()
+
+<!DOCTYPE html>
+<html lang="es-mx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title -->
+    <title>Proceso de Verificación de Pago con Atrato Pago</title>
+    <!-- Bootstrap css -->
+    <link rel="stylesheet" href="~/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/assets/css/fontawesome.all.min.css" />
+    <link rel="stylesheet" href="~/assets/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="~/assets/css/owl.theme.default.min.css" />
+    <link rel="stylesheet" href="~/assets/css/jquery.lineProgressbar.css" />
+    <link rel="stylesheet" href="~/assets/css/animate.min.css" />
+    <link rel="stylesheet" href="~/assets/css/meanmenu.min.css" />
+    <link rel="stylesheet" href="~/assets/css/style.css" />
+    <link rel="stylesheet" href="~/assets/css/color.css" />
+    <link rel="stylesheet" href="~/assets/css/responsive.css" />
+    <link rel="icon" type="image/png" sizes="192x192" href="~/assets/img/favicon/ms-icon-310x310.png">
+
+    <link rel="manifest" href="assets/img/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="assets/img/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    @mAnalitica.AnaliticaGoogle()
+</head>
+
+<body>
+    <!-- Preloader Area -->
+    <div id="preloader">
+        <div id="status">
+            <img src="assets/img/loader.gif" alt="img">
+        </div>
+    </div>
+
+    @navegacion.Menu()
+
+    <!-- Banner Area -->
+    <section class="p-5">
+        <div class="container ">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="common_banner_text">
+                        <h2 style="color: black">Proceso de Verificación de Pago con Atrato Pago</h2>
+                        <ul>
+                            <li><a style="color: black" href="~/">Inicio</a></li>
+                            <li><i style="color: black" class="fas fa-slash"></i></li>
+                            <li style="color: black" class="active">Proceso de Verificación de Pago con Atrato Pago</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- About-Top -->
+    <section id="about-top" class="p-5">
+        <div class="container">
+            <div class="row justify-content-center">
+
+                <div class="col-lg-8 col-md-8 col-sm-12 col-12">
+                    <div class="about_top_left_content">
+                        <div class="text-center">
+                            <img class="" src="~/zcore/img/hourglass.png" width="100" alt="Alternate Text" />
+                        </div>
+
+                        <div class="text-left">
+                            <h5 style="margin-top: 35px;">
+								<strong style="color: #DB843C">Agradecemos tu elección de Atrato Pago como medio de pago.</strong>
+                            </h5>
+                        </div>
+						<div class="text-left pt-3" style="color: #FF3131;">Te informamos que tu solicitud se encuentra en proceso de verificación y aceptación; una vez que haya sido confirmado el préstamo por parte de Atrato Pago procesaremos tu pedido para entrega, recibirás un correo electrónico con los detalles del mismo y un asesor de servicio se comunicará contigo para gestionar la entrega de tu paquete y verificar el costo de envío. </div>
+                        <div class="text-left pt-3">
+                            @*Te enviamos un correo con la información de tu pedido.*@ @*<br /><br />*@ <small><strong>(Verifica tu bandeja de SPAM en caso de no encontrar el correo en tu bandeja principal)</strong> </small>
+                        </div>
+						<div class="text-left pt-3">
+							¡Gracias por comprar en Maquipan!
+
+							<br /><br />
+							<a href="https://wa.me/5215569662786"> Si tienes alguna pregunta o necesitas asistencia, no dudes en ponerte en contacto con nuestro equipo de soporte. <br /><br /> </a> <strong>Estamos aquí para ayudarte</strong>. <br />
+							<a href="~/">
+								<img src="~/assets/img/logo.png" alt="logo">
+							</a>
+						</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    @navegacion.Footer()
+    <!-- CopyRight Area -->
+    <!-- Jquery -->
+    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
+    <script src="~/assets/js/popper.min.js"></script>
+    <script src="~/assets/js/bootstrap.min.js"></script>
+    <script src="~/assets/js/owl.carousel.min.js"></script>
+    <script src="~/assets/js/meanmenu.min.js"></script>
+    <script src="~/assets/js/jquery.waypoints.js"></script>
+    <script src="~/assets/js/jquery.lineProgressbar.js"></script>
+    <script src="~/assets/js/count.js"></script>
+    <script src="~/assets/js/nice-select.min.js"></script>
+    <script src="~/assets/js/wow.min.js"></script>
+    <script src="~/assets/js/custom.js"></script>
+    <script src="~/zcore/js/buscador.js"></script>
+    <script>
+        new WOW().init();
+    </script>
+    <script>
+        $(document).ready(function () {
+            var owl = $('.owl-carousel');
+            owl.owlCarousel({
+                items: 6,
+                loop: true,
+                margin: 40,
+                autoplay: true,
+                autoplayTimeout: 1500,
+                autoplayHoverPause: true
+            });
+        });
+    </script>
+
+</body>
+
+</html>

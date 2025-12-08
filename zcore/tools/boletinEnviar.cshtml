@@ -1,0 +1,96 @@
+@using System;
+@using System.Configuration;
+@using MySql.Data.MySqlClient
+
+@{
+	string correo = Request.Form["correo"];
+
+
+	using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+	{
+		CONN.Open();
+		bool correoExistente = false;
+
+		using (MySqlCommand CMD =
+		new MySqlCommand("SELECT correo FROM clientes WHERE correo = @correo", CONN))
+		{
+			CMD.Parameters.AddWithValue("@correo", correo);
+
+			using (MySqlDataReader DATOS = CMD.ExecuteReader())
+			{
+				if (DATOS.HasRows)
+				{
+					correoExistente = true;
+				}
+
+			}
+		}
+
+		if (correoExistente)
+		{
+			Response.Redirect("~/newsletterFallo");
+		}
+		else
+		{
+			using (MySqlCommand CMD2 = new MySqlCommand("INSERT INTO clientes (correo, contra) VALUES (@correo, @contra)", CONN))
+			{
+				CMD2.Parameters.AddWithValue("@correo", correo);
+				CMD2.Parameters.AddWithValue("@contra", "123");
+				CMD2.ExecuteNonQuery();
+			}
+
+			string contra = "123";
+
+			string mBody2 = "<html><body style='font-family: Arial;'>";
+			mBody2 += "<div style='text-align: center; background-color: #f2f2f2; padding: 20px;'>";
+			mBody2 += "<img src='https://maquipan.com.mx/assets/img/logo.png' alt='Logo' style='width: 150px; height: auto;' />";
+			mBody2 += "</div>";
+			mBody2 += "<div style='color: gray; font-size: 14px; margin-top: 20px;'>Gracias por suscribirte a nuestro bolet?n de novedades. Cuando tengamos nuestras pr?ximas ofertas, se te enviar? un correo. ?Gracias!</div>";
+			mBody2 += "<br /><div style='color: gray; font-size: 14px;'>Correo: " + correo + "</div>";
+			mBody2 += "<br /><div style='color: gray; font-size: 14px;'>Password generada: " + contra + "</div>";
+			mBody2 += "<br /><br /><hr style='border: 0; border-top: 1px solid #ddd;' />";
+			mBody2 += "<div style='text-align: center; color: gray; font-size: 12px; margin-top: 20px;'>Maquipan - Soluciones en Equipamiento y Tecnolog?a</div>";
+			mBody2 += "<div style='text-align: center; color: gray; font-size: 12px;'>Matriz Guadalajara, Jalisco: AV. La Paz 938. Centro. CP 44100</div>";
+			mBody2 += "<div style='text-align: center; color: gray; font-size: 12px;'>Sucursal CDMX: Dinamarca 86 Local 1A. Colonia Ju?rez</div>";
+			mBody2 += "<div style='text-align: center; color: gray; font-size: 12px;'>Ventas y Cotizaciones: 33 181-03563</div>";
+			mBody2 += "</body></html>";
+
+
+			// Usamos MailKit para enviar el correo
+			var message = new MimeKit.MimeMessage();
+			message.From.Add(new MimeKit.MailboxAddress("Maquipan", "ventaenlinea@maquipan.com.mx"));
+			message.To.Add(new MimeKit.MailboxAddress("Maquipan", correo));
+			message.Subject = "Newsletter Maquipan";
+
+			var bodyBuilder = new MimeKit.BodyBuilder
+			{
+				HtmlBody = mBody2,
+				TextBody = "Suscripcion News Letter Maquipan"
+			};
+			message.Body = bodyBuilder.ToMessageBody();
+			System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+			using (var client = new MailKit.Net.Smtp.SmtpClient())
+			{
+				try
+				{
+					client.Connect("smtp.ionos.mx", 465, true);
+
+					// Autenticamos si el servidor lo requiere
+					client.Authenticate("ventaenlinea@maquipan.com.mx", "6N*jMwZbf4hzWU");
+
+					client.Send(message);
+					Response.Redirect("~/newsletterGracias");
+				}
+				catch (Exception ex)
+				{
+					Response.Write("Error: " + ex.Message); // Aqu? gestionamos los errores al intentar enviar el correo
+				}
+				finally
+				{
+					client.Disconnect(true);
+				}
+			}
+		}
+	}
+
+}

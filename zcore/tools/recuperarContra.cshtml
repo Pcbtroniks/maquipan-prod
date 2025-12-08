@@ -1,0 +1,102 @@
+﻿@using System;
+@using System.Configuration;
+@using MySql.Data.MySqlClient
+
+@{
+	string correo = Request.Form["correo"];
+
+
+	using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+	{
+		CONN.Open();
+		bool correoExistente = false;
+
+		using (MySqlCommand CMD = new MySqlCommand("SELECT correo FROM clientes WHERE correo = @correo", CONN))
+		{
+			CMD.Parameters.AddWithValue("@correo", correo);
+
+			using (MySqlDataReader DATOS = CMD.ExecuteReader())
+			{
+				if (DATOS.HasRows)
+				{
+					correoExistente = true;
+				}
+
+			}
+		}
+
+		if (correoExistente)
+		{
+			using (MySqlCommand CMD2 = new MySqlCommand("SELECT contra, correo FROM clientes WHERE correo = @varCorreo", CONN))
+			{
+				CMD2.Parameters.AddWithValue("@varCorreo", correo);
+
+				MySqlDataReader DATOS = CMD2.ExecuteReader();
+				while (DATOS.Read())
+				{
+					string mBody2 = "<html><body style='font-family: Arial;'>";
+					mBody2 += "<div style='text-align: center; background-color: #f2f2f2; padding: 20px;'>";
+					mBody2 += "<img src='https://maquipan.com.mx/assets/img/logo.png' alt='Logo' style='width: 150px; height: auto; margin-bottom: 20px;' />";
+					mBody2 += "</div>";
+					mBody2 += "<div style='color: gray; font-size: 14px; margin-top: 20px;'>Hemos recibido una solicitud para recuperar tu contraseña. A continuación, te proporcionamos una contraseña temporal para que puedas acceder a tu cuenta y restablecer tu contraseña:</div>";
+					mBody2 += "<br /><div style='color: gray; font-size: 14px;'>Correo: " + correo + "</div>";
+					mBody2 += "<br /><div style='color: gray; font-size: 14px;'>Contraseña temporal: " + DATOS["contra"] + "</div>";
+					mBody2 += "<br /><div style='color: gray; font-size: 14px; margin-top: 20px;'>Te recomendamos que cambies tu contraseña una vez que ingreses al sistema para mayor seguridad.</div>";
+					mBody2 += "<br /><div style='color: gray; font-size: 14px; margin-top: 20px;'>Ingresar: https://maquipan.com.mx/login.</div>";
+					mBody2 += "<br /><br /><hr style='border: 0; border-top: 1px solid #ddd;' />";
+					mBody2 += "<div style='text-align: center; color: gray; font-size: 12px; margin-top: 20px;'>Maquipan - Soluciones en Equipamiento y Tecnología</div>";
+					mBody2 += "<div style='text-align: center; color: gray; font-size: 12px;'>Matriz Guadalajara, Jalisco: AV. La Paz 938. Centro. CP 44100</div>";
+					mBody2 += "<div style='text-align: center; color: gray; font-size: 12px;'>Sucursal CDMX: Dinamarca 86 Local 1A. Colonia Juárez</div>";
+					mBody2 += "<div style='text-align: center; color: gray; font-size: 12px;'>Ventas y Cotizaciones: 33 181-03563</div>";
+					mBody2 += "</body></html>";
+
+
+
+					// Usamos MailKit para enviar el correo
+					var message = new MimeKit.MimeMessage();
+					message.From.Add(new MimeKit.MailboxAddress("Maquipan", "ventaenlinea@maquipan.com.mx"));
+					message.To.Add(new MimeKit.MailboxAddress("Maquipan", correo));
+					message.Subject = "Recuperacion de contraseña Maquipan";
+
+					var bodyBuilder = new MimeKit.BodyBuilder
+					{
+						HtmlBody = mBody2,
+						TextBody = "Recuperacion de contraseña Maquipan"
+					};
+					message.Body = bodyBuilder.ToMessageBody();
+					System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+					using (var client = new MailKit.Net.Smtp.SmtpClient())
+					{
+						try
+						{
+							client.Connect("smtp.ionos.mx", 465, true);
+
+							// Autenticamos si el servidor lo requiere
+							client.Authenticate("ventaenlinea@maquipan.com.mx", "6N*jMwZbf4hzWU");
+
+							client.Send(message);
+						}
+						catch (Exception ex)
+						{
+							Response.Write("Error: " + ex.Message); // Aquí gestionamos los errores al intentar enviar el correo
+						}
+						finally
+						{
+							client.Disconnect(true);
+						}
+					}
+				}
+			}
+
+			Session["correoEx"] = "El correo se ha enviado con éxito, por favor revisa tu bandeja de entrada; en caso de no encontrarlo ve a tu carpeta de SPAM";
+			Response.Redirect("~/recupera");
+		}
+		else
+		{
+
+			Session["correoNoEx"] = "Lo sentimos, el correo que ingreso no esta registrado actualmente.";
+			Response.Redirect("~/recupera");
+		}
+	}
+
+}

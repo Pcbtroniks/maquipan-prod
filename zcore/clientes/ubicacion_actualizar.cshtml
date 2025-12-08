@@ -1,0 +1,52 @@
+@using System
+@using System.Configuration
+@using MySql.Data.MySqlClient
+
+@{
+    string id = mSeguridad.sslCampo(Request.Form["id"].ToUpper());
+    string nombre = mSeguridad.sslCampo(Request.Form["nombre"].ToUpper());
+    string calle = mSeguridad.sslCampo(Request.Form["calle"].ToUpper());
+    string exterior = mSeguridad.sslCampo(Request.Form["exterior"].ToUpper());
+    string interior = mSeguridad.sslCampo(Request.Form["interior"].ToUpper());
+
+    string estado = mSeguridad.sslCampo(Request.Form["estado"].ToUpper());
+    string municipio = mSeguridad.sslCampo(Request.Form["municipio"].ToUpper());
+    string colonia = mSeguridad.sslCampo(Request.Form["colonia"].ToUpper());
+    string cp = mSeguridad.sslCampo(Request.Form["cp"].ToUpper());
+
+    string cruces = mSeguridad.sslCampo(Request.Form["cruces"].ToUpper());
+    string observaciones = mSeguridad.sslCampo(Request.Form["observaciones"].ToUpper());
+
+    // ELIMINAMOS DATOS ERRONOES EN LOS CAMPOS
+    exterior = exterior.Replace("#", "");
+    exterior = exterior.Replace("no", "");
+    exterior = exterior.Replace(".", "");
+
+    interior = interior.Replace("#", "");
+    interior = interior.Replace("no", "");
+    interior = interior.Replace(".", "");
+
+    using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+    {
+        CONN.Open();
+        using (var CMD = new MySql.Data.MySqlClient.MySqlCommand("UPDATE fichas_ubicaciones SET   nombre = @varNombre,   calle = @varCalle,   exterior = @varExterior,   interior = @varInterior,   estado = @varEstado,   municipio = @varMunicipio,   colonia = @varColonia,   cp = @varCp,   cruces = @varCruces,   observaciones = @varObservaciones,    predeterminado = '1' WHERE id = @id;", CONN))
+        {
+
+            CMD.Parameters.AddWithValue("@id", id);
+            CMD.Parameters.AddWithValue("@varNombre", nombre);
+            CMD.Parameters.AddWithValue("@varCalle", calle);
+            CMD.Parameters.AddWithValue("@varExterior", exterior);
+            CMD.Parameters.AddWithValue("@varInterior", interior);
+            CMD.Parameters.AddWithValue("@varEstado", estado);
+            CMD.Parameters.AddWithValue("@varMunicipio", municipio);
+            CMD.Parameters.AddWithValue("@varColonia", colonia);
+            CMD.Parameters.AddWithValue("@varCp", cp);
+            CMD.Parameters.AddWithValue("@varCruces", cruces);
+            CMD.Parameters.AddWithValue("@varObservaciones", observaciones);
+
+            CMD.ExecuteNonQuery();
+        }
+    }
+    Response.Redirect("~/micuenta");
+
+}

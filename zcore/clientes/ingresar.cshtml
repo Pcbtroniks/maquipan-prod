@@ -1,0 +1,79 @@
+﻿@using System
+@using System.Configuration
+@using MySql.Data.MySqlClient
+
+<!-- CORE 4 | 24 SEP 2021 | ANDRES N C -->
+@{
+	string origen = mSeguridad.sslCampo(Request.Form["origen"]);
+	string correo = mSeguridad.sslCampo(Request.Form["correo"].ToLower());
+	string contra = mSeguridad.sslCampo(Request.Form["contra"]);
+
+	using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+	{
+		CONN.Open();
+		using (var CMD = new MySqlCommand("SELECT * FROM clientes WHERE correo = @varCorreo AND contra = @varContra LIMIT 1", CONN))
+		{
+			CMD.Parameters.AddWithValue("@varCorreo", correo);
+			CMD.Parameters.AddWithValue("@varContra", contra);
+
+			var DATOS = CMD.ExecuteReader();
+
+			if (DATOS.HasRows)
+			{
+				while (DATOS.Read())
+				{
+					{
+						// BORRAMOS LAS SESSIONES DE LOS MENSAJES
+						Session["mi_perfil_existe"] = "";
+						Session["mi_perfil_equivocado"] = "";
+
+						// CREAMOS LA COOKIE PARA LA SESSION
+						try
+						{
+							HttpCookie cookieSession = Request.Cookies.Get(mCore.mDominio);
+							if (cookieSession != null)
+							{
+								cookieSession.Values["d1"] = "1";
+								cookieSession.Values["z1"] = DATOS["id"].ToString();
+								cookieSession.Values["t0"] = DATOS["tipo"].ToString();
+								cookieSession.Values["c"] = DATOS["galleta"].ToString();
+								cookieSession.Expires = DateTime.Now.AddDays(30);
+								Response.Cookies.Add(cookieSession);
+							}
+							else
+							{
+								cookieSession = new HttpCookie(mCore.mDominio);
+								cookieSession.Values["d1"] = "1";
+								cookieSession.Values["z1"] = DATOS["id"].ToString();
+								cookieSession.Values["t0"] = DATOS["tipo"].ToString();
+								cookieSession.Values["c"] = DATOS["galleta"].ToString();
+								cookieSession.Expires = DateTime.Now.AddDays(30);
+								Response.Cookies.Add(cookieSession);
+							}
+						}
+						catch (Exception ex)
+						{
+							Response.Write(ex.Message + " " + mCore.mDominio);
+						}
+
+						if (origen == "c")
+						{
+							Response.Redirect("~/carrito");
+						}
+						else
+						{
+							Response.Redirect("~/micuenta");
+						}
+					}
+				}
+			}
+
+			else
+			{
+				Session["mi_perfil_equivocado"] = "** Tu correo o contraseña son incorrectos.";
+				Session["mi_perfil_existe"] = "";
+				Response.Redirect("~/login");
+			}
+		}
+	}
+}

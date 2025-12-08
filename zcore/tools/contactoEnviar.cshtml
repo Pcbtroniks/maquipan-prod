@@ -1,0 +1,53 @@
+@{
+	string nombre = Request.Form["nombre"];
+	string correo = Request.Form["correo"];
+	string telefono = Request.Form["tel"];
+	string asunto = Request.Form["asunto"];
+	string mensaje = Request.Form["mensaje"];
+
+
+	// Construimos el cuerpo del correo
+	string mBody2 = "<html><body>";
+	mBody2 += "<br /><br /><div style='color: gray; font-size: 14px; font-family: arial;'> Un usuario contact? desde el sitio web con la informaci?n: </div>";
+	mBody2 += "<br /><br /><div style='color: gray; font-size: 14px; font-family: arial;'>Nombre: " + nombre + "</div>";
+	mBody2 += "<br /><br /><div style='color: gray; font-size: 14px; font-family: arial;'>Correo: " + correo + " </div>";
+	mBody2 += "<br /><br /><div style='color: gray; font-size: 14px; font-family: arial;'>Tel?fono: " + telefono + " </div>";
+	mBody2 += "<br /><div style='color: gray; font-size: 14px; font-family: arial;'> <hr /> </div>";
+	mBody2 += "<br /><br /><div style='color: gray; font-size: 14px; font-family: arial;'>Mensaje: " + mensaje + " </div>";
+	mBody2 += "</body></html>";
+
+	// Usamos MailKit para enviar el correo
+	var message = new MimeKit.MimeMessage();
+	message.From.Add(new MimeKit.MailboxAddress("Contacto Maquipan", "ventaenlinea@maquipan.com.mx"));
+	message.To.Add(new MimeKit.MailboxAddress("Contacto Maquipan", "ventaenlinea@maquipan.com.mx"));
+	message.Subject = "Contacto WEB Maquipan" + asunto;
+
+	var bodyBuilder = new MimeKit.BodyBuilder
+	{
+		HtmlBody = mBody2,
+		TextBody = "Un usuario contact? desde el sitio web con la informaci?n: <br /> Nombre: " + nombre + " Correo: " + correo + " Tel?fono: " + telefono + " Mensaje de contacto"  
+	};
+	message.Body = bodyBuilder.ToMessageBody();
+	System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+	using (var client = new MailKit.Net.Smtp.SmtpClient())
+	{
+		try
+		{
+			client.Connect("smtp.ionos.mx", 465, true);
+
+			// Autenticamos si el servidor lo requiere
+			client.Authenticate("ventaenlinea@maquipan.com.mx", "6N*jMwZbf4hzWU");
+
+			client.Send(message);
+			Response.Redirect("/contacto_enviando");
+		}
+		catch (Exception ex)
+		{
+			Response.Write("Error: " + ex.Message); // Aqu? gestionamos los errores al intentar enviar el correo
+		}
+		finally
+		{
+			client.Disconnect(true);
+		}
+	}
+}

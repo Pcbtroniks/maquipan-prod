@@ -1,0 +1,54 @@
+@using System
+@using System.Web
+@using System.Configuration
+@using System.Globalization
+@using MySql.Data.MySqlClient
+
+@{
+    int idOrden, idArt, uid;
+    if (!int.TryParse(UrlData[0], out idOrden)) { Response.Redirect("~/carrito"); return; }
+    if (!int.TryParse(UrlData[1], out idArt)) { Response.Redirect("~/carrito"); return; }
+
+    var cookie = Request.Cookies["maquipan.com.mx"];
+
+    if (cookie == null || !int.TryParse(cookie["z1"], out uid))
+    {
+        Response.Redirect("~/login");
+        return;
+    }
+
+    try
+    {
+        using (var CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+        {
+            CONN.Open();
+
+            using (var TX = CONN.BeginTransaction())
+            {
+                using (var CMD = new MySqlCommand(@"
+        DELETE av
+        FROM artvent av
+        INNER JOIN ordenes o ON o.id = av.orden
+        WHERE av.id_art = @idArt
+          AND av.orden = @idOrden
+          AND o.id_cliente = @uid;
+        ;", CONN, TX))
+                {
+                    CMD.Parameters.AddWithValue("@idArt", idArt);
+                    CMD.Parameters.AddWithValue("@idOrden", idOrden);
+                    CMD.Parameters.AddWithValue("@uid", uid);
+
+                    CMD.ExecuteNonQuery();
+                    TX.Commit();
+                }
+            }
+        }
+
+        Response.Redirect("~/carrito");
+    }
+    catch (MySqlException)
+    {
+        Response.Redirect("~/carrito?e=1");
+    }
+
+}

@@ -1,0 +1,12 @@
+﻿@{
+	HttpCookie cookieSession = Request.Cookies.Get(mCore.mDominio);
+	cookieSession = new HttpCookie(mCore.mDominio);
+	cookieSession.Values["d1"] = "0";
+	cookieSession.Values["z1"] = "0";
+	cookieSession.Values["t0"] = "b";
+	cookieSession.Values["c"] = DateTime.Now.ToString().GetHashCode().ToString("x");
+	cookieSession.Expires = DateTime.Now.AddDays(1);
+
+	Response.Cookies.Add(cookieSession);
+	Response.Redirect("~/login.cshtml");
+}
