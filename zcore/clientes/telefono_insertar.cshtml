@@ -1,0 +1,32 @@
+@using System
+@using System.Configuration
+@using MySql.Data.MySqlClient
+
+@{
+    string cliente = mSeguridad.sslCampo(mClientes.getInfoCliente("id", mClientes.ObtenerValorCookie("c")));
+    string origen = mSeguridad.sslCampo(Request.Form["origen1"].ToLower());
+    string numero = mSeguridad.sslCampo(Request.Form["numero"]);
+
+
+    using (MySqlConnection CONN = new MySqlConnection(ConfigurationManager.ConnectionStrings["SDNS"].ConnectionString))
+    {
+        CONN.Open();
+        using (MySqlCommand CMD = new MySqlCommand("UPDATE clientes SET telefono1 = @varNumero, movil = @varNumero WHERE id = @varId", CONN))
+        {
+
+            CMD.Parameters.AddWithValue("@varNumero", numero);
+            CMD.Parameters.AddWithValue("@varId", cliente);
+
+            CMD.ExecuteNonQuery();
+        }
+    }
+    if (origen == "c")
+    {
+        Response.Redirect("~/carrito");
+    }
+    else
+    {
+        Response.Redirect("~/micuenta");
+    }
+
+}
