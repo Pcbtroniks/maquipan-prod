@@ -355,73 +355,73 @@
                     }
 
                 </div>
-                    <div class="col-lg-4 col-md-4">
-                        <table>
-                            <tr class="zCardTitle">
-                                <td colspan="2">Información de la orden</td>
-                            </tr>
+                <div class="col-lg-4 col-md-4">
+                    <table>
+                        <tr class="zCardTitle">
+                            <td colspan="2">Información de la orden</td>
+                        </tr>
+                        <tr>
+                            <td>Ubicacion de entrega:</td>
+                            <td></td>
+                        </tr>
+                        <tr class="zCardTotal">
+                            <td>Total:</td>
+                            <td class="text-end">$@grandTotal.ToString("N2") mxn</td>
+                        </tr>
+                        @{ string telefono = mClientes.getInfoCliente("telefono1", mClientes.ObtenerValorCookie("c"));
+                            string movil = mClientes.getInfoCliente("movil", mClientes.ObtenerValorCookie("c")); }
+                        @if (grandTotal >= 1 && (!string.IsNullOrEmpty(telefono) && !string.IsNullOrEmpty(movil)))
+                        {
                             <tr>
-                                <td>Ubicacion de entrega:</td>
-                                <td></td>
-                            </tr>
-                            <tr class="zCardTotal">
-                                <td>Total:</td>
-                                <td class="text-end">$@grandTotal.ToString("N2") mxn</td>
-                            </tr>
-                            @{ string telefono = mClientes.getInfoCliente("telefono1", mClientes.ObtenerValorCookie("c"));
-                               string movil = mClientes.getInfoCliente("movil", mClientes.ObtenerValorCookie("c")); }
-                                @if (grandTotal >= 1 && (!string.IsNullOrEmpty(telefono) && !string.IsNullOrEmpty(movil)))
-                                {
-                                <tr>
-                                    <td colspan="2">
-                                        @{
-                                            if (tipoCarrito == "orden")
+                                <td colspan="2">
+                                    @{
+                                        if (tipoCarrito == "orden")
+                                        {
+
+                                            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                                            MercadoPagoConfig.IntegratorId = "dev_fda4d91e596211ea80ed0242ac130004";
+                                            MercadoPagoConfig.AccessToken = mConfiguraciones.getConfiguraciones("mpaccesstoken");
+
+                                            // CRAEMOS LA PREFERENCIA
+                                            PreferenceRequest preferencia = new PreferenceRequest()
                                             {
+                                                AutoReturn = "approved",
+                                                StatementDescriptor = mCore.mEmpresa,
+                                                ExternalReference = mOrdenes.idOrderOpenGalleta(),
+                                                NotificationUrl = "https://" + mCore.mDominio + "/zcore/ipn",
+                                            };
 
-                                                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                                            preferencia.PaymentMethods = new PreferencePaymentMethodsRequest
+                                            {
+                                                ExcludedPaymentMethods = new List<PreferencePaymentMethodRequest> { },
+                                                ExcludedPaymentTypes = new List<PreferencePaymentTypeRequest> { new PreferencePaymentTypeRequest { Id = "atm", }, },
+                                                Installments = 6,
+                                            };
 
-                                                MercadoPagoConfig.IntegratorId = "dev_fda4d91e596211ea80ed0242ac130004";
-                                                MercadoPagoConfig.AccessToken = mConfiguraciones.getConfiguraciones("mpaccesstoken");
-
-                                                // CRAEMOS LA PREFERENCIA
-                                                PreferenceRequest preferencia = new PreferenceRequest()
+                                            preferencia.Payer = new PreferencePayerRequest
+                                            {
+                                                Name = mClientes.getInfoCliente("nombre", mClientes.ObtenerValorCookie("c")),
+                                                Surname = mClientes.getInfoCliente("paterno", mClientes.ObtenerValorCookie("c")),
+                                                Email = mClientes.getInfoCliente("correo", mClientes.ObtenerValorCookie("c")),
+                                                Phone = new PhoneRequest
                                                 {
-                                                    AutoReturn = "approved",
-                                                    StatementDescriptor = mCore.mEmpresa,
-                                                    ExternalReference = mOrdenes.idOrderOpenGalleta(),
-                                                    NotificationUrl = "https://" + mCore.mDominio + "/zcore/ipn",
-                                                };
+                                                    AreaCode = "",
+                                                    Number = mClientes.getInfoCliente("telefono1", mClientes.ObtenerValorCookie("c")),
+                                                },
+                                            };
 
-                                                preferencia.PaymentMethods = new PreferencePaymentMethodsRequest
-                                                {
-                                                    ExcludedPaymentMethods = new List<PreferencePaymentMethodRequest> { },
-                                                    ExcludedPaymentTypes = new List<PreferencePaymentTypeRequest> { new PreferencePaymentTypeRequest { Id = "atm", }, },
-                                                    Installments = 6,
-                                                };
+                                            // PREFERENCIAS DE LIGAS BACKURLS
+                                            preferencia.BackUrls = new PreferenceBackUrlsRequest
+                                            {
+                                                Success = "https://" + mCore.mDominio + "/pago_aprobado",
+                                                Failure = "https://" + mCore.mDominio + "/carrito",
+                                                Pending = "https://" + mCore.mDominio + "/pago_aprobado"
+                                            };
 
-                                                preferencia.Payer = new PreferencePayerRequest
-                                                {
-                                                    Name = mClientes.getInfoCliente("nombre", mClientes.ObtenerValorCookie("c")),
-                                                    Surname = mClientes.getInfoCliente("paterno", mClientes.ObtenerValorCookie("c")),
-                                                    Email = mClientes.getInfoCliente("correo", mClientes.ObtenerValorCookie("c")),
-                                                    Phone = new PhoneRequest
-                                                    {
-                                                        AreaCode = "",
-                                                        Number = mClientes.getInfoCliente("telefono1", mClientes.ObtenerValorCookie("c")),
-                                                    },
-                                                };
-
-                                                // PREFERENCIAS DE LIGAS BACKURLS
-                                                preferencia.BackUrls = new PreferenceBackUrlsRequest
-                                                {
-                                                    Success = "https://" + mCore.mDominio + "/pago_aprobado",
-                                                    Failure = "https://" + mCore.mDominio + "/carrito",
-                                                    Pending = "https://" + mCore.mDominio + "/pago_aprobado"
-                                                };
-
-                                                // PREFERENCIAS DEL ITEM COMPRADO
-                                                preferencia.Items = new List<PreferenceItemRequest>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
+                                            // PREFERENCIAS DEL ITEM COMPRADO
+                                            preferencia.Items = new List<PreferenceItemRequest>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {
                                                new PreferenceItemRequest
                                                {
                                                     Id = mOrdenes.idOrderOpenGalleta(),
@@ -433,18 +433,18 @@
                                                 },
                                             };
 
-                                                //Crea la preferencia usando el client
-                                                var client = new PreferenceClient();
-                                                Preference Preferencia = client.Create(preferencia);
+                                            //Crea la preferencia usando el client
+                                            var client = new PreferenceClient();
+                                            Preference Preferencia = client.Create(preferencia);
 
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="" id="terminosCheck" required>
-                                                    <label class="form-check-label" for="terminosCheck">
-                                                        Acepto los términos y condiciones de envío y pago
-                                                    </label>
-                                                </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="" id="terminosCheck" required>
+                                                <label class="form-check-label" for="terminosCheck">
+                                                    Acepto los términos y condiciones de envío y pago
+                                                </label>
+                                            </div>
 
-                                                <script>
+                                            <script>
                                                     const mp = new MercadoPago("@mConfiguraciones.getConfiguraciones("mppublickey")")
                                                     const bricksBuilder = mp.bricks();
                                                     mp.bricks().create("wallet", "wallet_container", {
@@ -457,90 +457,95 @@
                                                             },
                                                         },
                                                     });
-                                                </script>
+                                            </script>
 
-
-                                            }
-                                            else
-                                            {
-                                                <div class="form-check">
-                                                    <a href="~/zcore/ordenes/generar" class="btn btn-success mt-2 mb-2" style="width: 100%;"> Siguiente</a>
-                                                </div>
-                                            }
 
                                         }
-                                    </td>
-                                </tr>
-                                if (tipoCarrito == "orden")
-                                {
-                                    <tr>
-                                        <td colspan="2">
-                                            <div id="wallet_container"></div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">
-                                            <div id="wallet_atrato">
-                                                <div id="higslide-div-atrato-info"
-                                                     data-ordernumber="QUOTE"
-                                                     data-orderid="@zCoreNoOrden"
-                                                     data-idcommerce="313730372d33343638"
-                                                     data-key="bWFxdWlwYW46MTcwNw=="
-                                                     data-price="@grandTotal"
-                                                     data-product="Maquipan Venta"
-                                                     data-email="ejemplo@correo.com"
-                                                     data-name="Pedro Lopéz"
-                                                     data-phone="3313134494"
-                                                     data-plataform="other"
-                                                     data-type="pago"
-                                                     data-version="2"
-                                                     data-sandbox="false"
-                                                     data-urlhost="https://app.atratopago.com">
-                                                </div>
-                                                <div id="messageData"></div>
+                                        else
+                                        {
+                                            <div class="form-check">
+                                                <a href="~/zcore/ordenes/generar" class="btn btn-success mt-2 mb-2" style="width: 100%;"> Siguiente</a>
                                             </div>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
+                                        }
+
+                                    }
+                                </td>
+                            </tr>
+                                        if (tipoCarrito == "orden")
+                                        {
                                 <tr>
                                     <td colspan="2">
-                                        <div class="text-center mt-4">
-                                            <span class="fs-6 fw-bold">
-                                                "FAVOR DE AÑADIR UN NÚMERO DE CONTACTO PARA CONTINUAR CON LA COMPRA"
-                                            </span>
+                                        <div id="wallet_container"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <div id="wallet_atrato">
+                                            <div id="higslide-div-atrato-info"
+                                                 data-ordernumber="QUOTE"
+                                                 data-orderid="@zCoreNoOrden"
+                                                 data-idcommerce="313730372d33343638"
+                                                 data-key="bWFxdWlwYW46MTcwNw=="
+                                                 data-price="@grandTotal"
+                                                 data-product="Maquipan Venta"
+                                                 data-email="ejemplo@correo.com"
+                                                 data-name="Pedro Lopéz"
+                                                 data-phone="3313134494"
+                                                 data-plataform="other"
+                                                 data-type="pago"
+                                                 data-version="2"
+                                                 data-sandbox="false"
+                                                 data-urlhost="https://app.atratopago.com">
+                                            </div>
+                                            <div id="messageData"></div>
                                         </div>
                                     </td>
                                 </tr>
 
-                                <table class="mb-2">
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                        }
+                    </table>
+                        @if (mOrdenes.haveOrderOpen() && string.IsNullOrEmpty(telefono) && string.IsNullOrEmpty(movil))
+                        {
                                     <tr>
-                                        <td>
-                                            <form id="agregarTelefono" name="agregarTelefono" method="post" enctype="multipart/form-data" action="~/zcore/clientes/telefono_insertar.cshtml">
-                                                <div class="col-md-12 mt-2">
-                                                    <input name="origen1" type="hidden" value="c" />
-
-                                                    <label for="numero">Número de Celular *<small class="text-muted">(Requerido)</small></label>
-                                                    <input class="form-control" id="numero" name="numero" style="width=100%" />
-                                                </div>
-
-                                                <div class="row" style="padding-top: 10px;">
-                                                    <div style="width=100%">
-                                                        <button type="submit" class="btn btn-success" style="color: white; width: 100%;">AGREGAR NÚMERO</button>
-                                                    </div>
-                                                </div>
-                                            </form>
+                                        <td colspan="2">
+                                            <div class="text-center mt-4">
+                                                <span class="fs-6 fw-bold">
+                                                    "FAVOR DE AÑADIR UN NÚMERO DE CONTACTO PARA CONTINUAR CON LA COMPRA"
+                                                </span>
+                                            </div>
                                         </td>
-
-                                        <td></td>
-
                                     </tr>
-                                </table>
-                            }
-                        </table>
-                    </div>
+
+                                    <table class="mb-2">
+                                        <tr>
+                                            <td>
+                                                <form id="agregarTelefono" name="agregarTelefono" method="post" enctype="multipart/form-data" action="~/zcore/clientes/telefono_insertar.cshtml">
+                                                    <div class="col-md-12 mt-2">
+                                                        <input name="origen1" type="hidden" value="c" />
+
+                                                        <label for="numero">Número de Celular *<small class="text-muted">(Requerido)</small></label>
+                                                        <input class="form-control" id="numero" name="numero" style="width=100%" />
+                                                    </div>
+
+                                                    <div class="row" style="padding-top: 10px;">
+                                                        <div style="width=100%">
+                                                            <button type="submit" class="btn btn-success" style="color: white; width: 100%;">AGREGAR NÚMERO</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </td>
+
+                                            <td></td>
+
+                                        </tr>
+                                    </table>
+                          }
+                </div>
                 </div>
             </div>
     </section>
