@@ -72,7 +72,8 @@
             Text = correoCuerpo
         };
         message.Bcc.Add(new MailboxAddress("Maquipan", "ventaenlinea@maquipan.com.mx"));
-        //message.Cc.Add(new MailboxAddress("", ccCorreo));
+        message.Bcc.Add(new MailboxAddress("Maquipan", "alma.palacios@maquipan.com.mx"));
+        //string ccCorreo = "        //message.Cc.Add(new MailboxAddress("", ccCorreo));
 		System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
         try
         {
