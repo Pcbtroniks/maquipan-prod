@@ -370,7 +370,7 @@
                         </tr>
                         @{ string telefono = mClientes.getInfoCliente("telefono1", mClientes.ObtenerValorCookie("c"));
                             string movil = mClientes.getInfoCliente("movil", mClientes.ObtenerValorCookie("c")); }
-                        @if (grandTotal >= 1 && (!string.IsNullOrEmpty(telefono) && !string.IsNullOrEmpty(movil)))
+                        @if (grandTotal >= 1 && !string.IsNullOrWhiteSpace(telefono) && !string.IsNullOrWhiteSpace(movil))
                         {
                             <tr>
                                 <td colspan="2">
@@ -509,41 +509,27 @@
                                         {
                                         }
                     </table>
-                        @if (mOrdenes.haveOrderOpen() && string.IsNullOrEmpty(telefono) && string.IsNullOrEmpty(movil))
+                        @if (mOrdenes.haveOrderOpen() && (string.IsNullOrWhiteSpace(telefono) || string.IsNullOrWhiteSpace(movil)))
                         {
-                                    <tr>
-                                        <td colspan="2">
-                                            <div class="text-center mt-4">
-                                                <span class="fs-6 fw-bold">
-                                                    "FAVOR DE AÑADIR UN NÚMERO DE CONTACTO PARA CONTINUAR CON LA COMPRA"
-                                                </span>
+                                    <div class="alert alert-warning text-center mt-4" role="alert">
+                                        <strong>¡ATENCIÓN!</strong><br/>
+                                        FAVOR DE AÑADIR UN NÚMERO DE TELÉFONO Y UN NÚMERO DE CELULAR PARA CONTINUAR CON LA COMPRA
+                                    </div>
+
+                                    <form id="agregarTelefono" name="agregarTelefono" method="post" enctype="multipart/form-data" action="~/zcore/clientes/telefono_insertar.cshtml">
+                                        <div class="col-md-12 mt-2">
+                                            <input name="origen1" type="hidden" value="c" />
+
+                                            <label for="numero">Número de Celular *<small class="text-muted">(Requerido)</small></label>
+                                            <input class="form-control" id="numero" name="numero" type="tel" pattern="[0-9]{10}" maxlength="10" style="width: 100%;" placeholder="10 dígitos" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                        </div>
+
+                                        <div class="row" style="padding-top: 10px;">
+                                            <div class="col-md-12">
+                                                <button type="submit" class="btn btn-success" style="color: white; width: 100%;">AGREGAR NÚMERO</button>
                                             </div>
-                                        </td>
-                                    </tr>
-
-                                    <table class="mb-2">
-                                        <tr>
-                                            <td>
-                                                <form id="agregarTelefono" name="agregarTelefono" method="post" enctype="multipart/form-data" action="~/zcore/clientes/telefono_insertar.cshtml">
-                                                    <div class="col-md-12 mt-2">
-                                                        <input name="origen1" type="hidden" value="c" />
-
-                                                        <label for="numero">Número de Celular *<small class="text-muted">(Requerido)</small></label>
-                                                        <input class="form-control" id="numero" name="numero" style="width=100%" />
-                                                    </div>
-
-                                                    <div class="row" style="padding-top: 10px;">
-                                                        <div style="width=100%">
-                                                            <button type="submit" class="btn btn-success" style="color: white; width: 100%;">AGREGAR NÚMERO</button>
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                            </td>
-
-                                            <td></td>
-
-                                        </tr>
-                                    </table>
+                                        </div>
+                                    </form>
                           }
                 </div>
                 </div>
