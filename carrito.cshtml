@@ -370,7 +370,7 @@
                         </tr>
                         @{ string telefono = mClientes.getInfoCliente("telefono1", mClientes.ObtenerValorCookie("c"));
                             string movil = mClientes.getInfoCliente("movil", mClientes.ObtenerValorCookie("c")); }
-                        @if (grandTotal >= 1 && !string.IsNullOrWhiteSpace(telefono) && !string.IsNullOrWhiteSpace(movil))
+                        @if (grandTotal >= 1 && (!string.IsNullOrWhiteSpace(telefono) || !string.IsNullOrWhiteSpace(movil)))
                         {
                             <tr>
                                 <td colspan="2">
@@ -521,7 +521,7 @@
                                             <input name="origen1" type="hidden" value="c" />
 
                                             <label for="numero">Número de Celular *<small class="text-muted">(Requerido)</small></label>
-                                            <input class="form-control" id="numero" name="numero" type="tel" pattern="[0-9]{10}" maxlength="10" style="width: 100%;" placeholder="10 dígitos" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                            <input class="form-control" id="numero" name="numero" style="width: 100%;" required />
                                         </div>
 
                                         <div class="row" style="padding-top: 10px;">
